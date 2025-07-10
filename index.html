@@ -691,7 +691,7 @@
         ...history
       ];
       try {
-        const API_URL = window.SAGE_API_URL || "http://localhost:1234/v1/chat/completions";
+        const API_URL = window.SAGE_API_URL || "https://1827f4679046.ngrok-free.app:1234/v1/chat/completions";
         const res = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
