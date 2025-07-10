@@ -313,7 +313,7 @@
   <script>
   document.addEventListener('DOMContentLoaded', function() {
     // Set your public API URL for ngrok here:
-    window.SAGE_API_URL = "https://3db84a7020fa.ngrok-free.app/v1/chat/completions";
+    window.SAGE_API_URL = "https://1827f4679046.ngrok-free.app/v1/chat/completions";
 
     // --- Dark mode support ---
     const darkSwitch = document.getElementById("darkmodeSwitch");
@@ -700,7 +700,7 @@
             messages: messages,
             temperature: 0.8,
             top_p: 0.95,
-            max_tokens: 2048
+            max_tokens: 4060
           })
         });
         const data = await res.json();
