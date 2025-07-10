@@ -313,6 +313,9 @@
   <input type="file" id="importInput" accept=".txt" aria-label="Import conversation text file">
 
   <script>
+    // Set your public API URL for ngrok here:
+    window.SAGE_API_URL = "https://3db84a7020fa.ngrok-free.app/v1/chat/completions";
+
     // --- Dark mode support ---
     const darkSwitch = document.getElementById("darkmodeSwitch");
 
@@ -690,9 +693,7 @@
         ...history
       ];
       try {
-  // Updated API_URL to use the ngrok forwarding address
-  const API_URL = "https://3db84a7020fa.ngrok-free.app/v1/chat/completions?
-  // ...rest of your code remains unchanged
+        const API_URL = window.SAGE_API_URL || "http://localhost:1234/v1/chat/completions";
         const res = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
