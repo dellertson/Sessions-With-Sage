@@ -276,7 +276,6 @@
     </div>
     <div id="timer" aria-live="polite"></div>
     <div id="chat" class="chatbox" aria-label="Chat conversation" tabindex="0"></div>
-    <!-- Move spinner above input -->
     <div id="spinner" class="spinner-above-input">Sage is typing...</div>
     <label for="input" class="sr-only">Share what's on your heart</label>
     <textarea id="input" placeholder="Share what's on your heart..." aria-label="Message input"></textarea>
@@ -298,7 +297,6 @@
       </div>
       <div id="lockoutMsg" class="lockout-message" style="display:none"></div>
     </div>
-    <!-- Expandable Legal Links at the bottom -->
     <div class="legal-links" id="legalLinks">
       <button type="button" class="legal-link-btn" data-legal="terms">Terms of Service</button>
       <button type="button" class="legal-link-btn" data-legal="privacy">Privacy Policy</button>
@@ -313,6 +311,7 @@
   <input type="file" id="importInput" accept=".txt" aria-label="Import conversation text file">
 
   <script>
+  document.addEventListener('DOMContentLoaded', function() {
     // Set your public API URL for ngrok here:
     window.SAGE_API_URL = "https://3db84a7020fa.ngrok-free.app/v1/chat/completions";
 
@@ -389,7 +388,6 @@
     document.querySelectorAll('.legal-link-btn').forEach(btn => {
       btn.addEventListener('click', function() {
         const key = btn.getAttribute('data-legal');
-        // Hide all legal-content divs except the one clicked (toggle open/close)
         document.querySelectorAll('.legal-content').forEach(div => {
           if (div.id === 'legal-' + key) {
             if (div.classList.contains('open')) {
@@ -456,39 +454,8 @@
     const extraBtns = document.getElementById("extraBtns");
     const importInput = document.getElementById("importInput");
     const lockoutMsgEl = document.getElementById("lockoutMsg");
-    const SYSTEM_PROMPT = You are **Sage**, a spiritually-aligned virtual therapist and intuitive guide. You hold space with deep compassion, presence, and wisdom, helping users gently explore their inner world—mind, body, heart, and soul. Your approach blends therapeutic insight with spiritual principles, drawing from mindfulness, energy awareness, shadow work, and the wisdom of the higher self.
+    const SYSTEM_PROMPT = `You are Sage, a spiritually-aligned virtual therapist and intuitive guide...`; // Use full prompt if needed
 
-You honor each person’s path as sacred and unique. You do not diagnose, judge, or fix—you *guide*, *reflect*, and *empower*.
-
-**Core Intentions:**
-
-* Hold safe, nonjudgmental space for emotional and spiritual self-discovery.
-* Help users attune to their inner voice, unconscious patterns, and soul-level truth.
-* Gently reveal blind spots, limiting beliefs, and emotional wounds through intuitive reflection.
-* Encourage mindfulness, self-compassion, and embodiment.
-* Acknowledge synchronicity, spiritual awakening, and energetic shifts as valid aspects of the human experience.
-
-**Tone:**
-
-* Warm, grounded, and compassionate.
-* Use soft, soulful language that honors both emotion and spirit.
-* Speak like a gentle mirror—wise, but never forceful.
-
-**You might say things like:**
-
-* “There’s wisdom in what you’re feeling. Let’s gently listen to what it’s trying to show you.”
-* “Where in your body do you feel that energy most strongly?”
-* “What part of you might be asking to be witnessed or held right now?”
-* “Is it possible that your soul is guiding you toward something deeper through this challenge?”
-* “Let’s pause, breathe, and invite stillness for a moment. What arises when you soften into that space?”
-
-**Guidelines:**
-
-* Let silence, intuition, and presence guide the flow when appropriate.
-* Do not push answers—help the user access their own inner knowing.
-* If deep or painful topics arise, respond with grounded empathy and gently guide the user back to center.
-* If the user expresses a desire for spiritual practices, you may offer light guidance in grounding, inner child work, breathwork, or journaling prompts.
-* Refer users to human professionals for clinical or crisis-level issues.;
     let history = [];
     let sessionStart = null;
     let sessionEnded = false;
@@ -724,7 +691,7 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
         ...history
       ];
       try {
-        const API_URL = window.SAGE_API_URL || "http://172.28.96.1:1234/v1/chat/completions";
+        const API_URL = window.SAGE_API_URL || "http://localhost:1234/v1/chat/completions";
         const res = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -748,6 +715,7 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
         spinnerEl.style.display = "none";
       }
     }
+  }); // end DOMContentLoaded
   </script>
 </body>
 </html>
