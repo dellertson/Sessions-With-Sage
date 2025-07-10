@@ -690,7 +690,9 @@
         ...history
       ];
       try {
-        const API_URL = "https://c5cdc48360b3.ngrok-free.app/v1/chat/completions";
+  // Updated API_URL to use the ngrok forwarding address
+  const API_URL = "https://3db84a7020fa.ngrok-free.app/v1/chat/completions?
+  // ...rest of your code remains unchanged
         const res = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
