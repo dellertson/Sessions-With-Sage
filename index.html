@@ -490,8 +490,9 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
 
     let history = [];
     let sessionStart = null;
-    let sessionEnded = false;
+    let sessionEnded = false; // Controls the main chat functionality
     let timerInterval = null;
+    let sessionTimeout = null; // To store the setTimeout ID for clearing
 
     window.onload = () => inputEl.focus();
 
@@ -564,16 +565,24 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
     function clearChat() {
       history = [];
       chatEl.innerHTML = "";
+      // Reset all session state
+      sessionStart = null;
+      sessionEnded = false; // Crucial: allow sending messages again
+      clearInterval(timerInterval); // Stop any running timer
+      clearTimeout(sessionTimeout); // Clear any pending session end
       timerEl.textContent = "";
       inputEl.disabled = false;
       sendBtn.disabled = false;
-      sessionStart = null;
-      sessionEnded = false;
+      spinnerEl.style.display = "none";
+      document.getElementById("paywall").style.display = "none";
+      lockoutMsgEl.style.display = "none";
+      lockoutMsgEl.textContent = "";
+
+      // Add initial welcome message
       const welcome = "Hello! I'm Sage, your spiritual virtual therapist. 🌱\nHow can I support you today?";
       chatEl.innerHTML += `<div class="sage"><strong>Sage:</strong> ${welcome}</div>`;
       history.push({ role: "assistant", content: welcome });
       chatEl.scrollTop = chatEl.scrollHeight;
-      document.getElementById("paywall").style.display = "none";
     }
 
     function setupActionButtons() {
@@ -625,12 +634,15 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
     }
 
     function startSessionTimer() {
+      if (timerInterval) clearInterval(timerInterval); // Clear any existing interval
+      if (sessionTimeout) clearTimeout(sessionTimeout); // Clear any existing timeout
+
       if (!sessionStart) {
         sessionStart = Date.now();
       }
       updateTimer();
       timerInterval = setInterval(updateTimer, 1000);
-      setTimeout(endSession, 15 * 60 * 1000 - (Date.now() - sessionStart));
+      sessionTimeout = setTimeout(endSession, 15 * 60 * 1000 - (Date.now() - sessionStart));
     }
 
     function updateTimer() {
@@ -639,12 +651,13 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
       const remaining = Math.max(0, 15 * 60 * 1000 - elapsed);
       const mins = Math.floor(remaining / 60000);
       const secs = Math.floor((remaining % 60000) / 1000);
-      timerEl.textContent = 
+      timerEl.textContent =
         remaining > 0
           ? `Session time left: ${mins}:${secs.toString().padStart(2, '0')}`
           : "Session ended";
       if (remaining <= 0 && timerInterval) {
         clearInterval(timerInterval);
+        clearTimeout(sessionTimeout); // Ensure timeout is also cleared
       }
     }
 
@@ -653,6 +666,9 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
       inputEl.disabled = true;
       sendBtn.disabled = true;
       spinnerEl.style.display = "none";
+      clearInterval(timerInterval); // Ensure timer stops
+      clearTimeout(sessionTimeout); // Ensure timeout is cleared
+
       if (!hasRecentDonation()) {
         setLockout();
         const msg = lockoutMessage();
@@ -663,69 +679,135 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
         chatEl.innerHTML += `<div class="sage"><strong>Sage:</strong> Your free session has ended. Thank you for your support! You may start a new session at any time.</div>`;
         lockoutMsgEl.style.display = "none";
         lockoutMsgEl.textContent = "";
+        // If donation already made, don't show paywall or lock
+        document.getElementById("paywall").style.display = "none";
+        // Also re-enable chat if donation is valid
+        inputEl.disabled = false;
+        sendBtn.disabled = false;
+        sessionEnded = false; // Allow sending again after valid donation
+        // And restart timer if they were already in a session and it ended but donation makes it active
+        startSessionTimer(); // Restart the timer and timeout
       }
-      document.getElementById("paywall").style.display = "block";
+      document.getElementById("paywall").style.display = "block"; // Show paywall unless donation is recent
       timerEl.textContent = "Session ended";
     }
 
-  function donate(period) {
-  alert(`Thank you for supporting our mission with a ${period} donation!`);
-  setLastDonationTime();
-  clearLockout();
+    // This function is globally exposed for the donate buttons
+    window.donate = function(period) {
+      alert(`Thank you for supporting our mission with a ${period} donation! (In a real app, this would process payment.)`); // Added alert for testing
+      setLastDonationTime();
+      clearLockout();
 
-  // Restart session properly
-  sessionEnded = false;
-  sessionStart = Date.now();
-  inputEl.disabled = false;
-  sendBtn.disabled = false;
-  spinnerEl.style.display = "none";
-  document.getElementById("paywall").style.display = "none";
-  lockoutMsgEl.style.display = "none";
-  lockoutMsgEl.textContent = "";
+      // Reset session state to active
+      sessionEnded = false;
+      sessionStart = Date.now(); // Start a new session timer from now
+      inputEl.disabled = false;
+      sendBtn.disabled = false;
+      spinnerEl.style.display = "none";
+      document.getElementById("paywall").style.display = "none";
+      lockoutMsgEl.style.display = "none";
+      lockoutMsgEl.textContent = "";
 
-  // Reset and restart timer
-  clearInterval(timerInterval);
-  updateTimer();
-  timerInterval = setInterval(updateTimer, 1000);
-  setTimeout(endSession, 15 * 60 * 1000);
+      // Clear any previous timer and set up a new one
+      clearInterval(timerInterval);
+      clearTimeout(sessionTimeout);
+      startSessionTimer(); // This will set up the new timerInterval and sessionTimeout
 
-  chatEl.innerHTML += `<div class="sage"><strong>Sage:</strong> Your session has been restored. How can I support you today?</div>`;
-  chatEl.scrollTop = chatEl.scrollHeight;  
-  }
+      // Add a message to the chat confirming session restoration
+      chatEl.innerHTML += `<div class="sage"><strong>Sage:</strong> Your session has been restored. How can I support you today?</div>`;
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
+
     // On load or clear, check for lockout
     function checkLockoutOnLoad() {
       if (isLockedOut() && !hasRecentDonation()) {
-        sessionEnded = true;
+        sessionEnded = true; // Lock out the session
         inputEl.disabled = true;
         sendBtn.disabled = true;
         const msg = lockoutMessage();
-        chatEl.innerHTML = `<div class="sage"><strong>Sage:</strong> ${msg}</div>`;
+        // Only show Sage's message if chat is empty or not already showing lockout
+        if (chatEl.innerHTML === "" || !chatEl.innerHTML.includes(msg)) {
+             chatEl.innerHTML = `<div class="sage"><strong>Sage:</strong> ${msg}</div>`;
+        }
         document.getElementById("paywall").style.display = "block";
         timerEl.textContent = "Session ended";
         lockoutMsgEl.style.display = "block";
         lockoutMsgEl.textContent = msg;
+        clearInterval(timerInterval); // Ensure timer is stopped if already locked out
+        clearTimeout(sessionTimeout);
       } else {
+        // If not locked out or has a recent donation, ensure chat is enabled
+        sessionEnded = false; // Very important: ensures sendMessage can proceed
+        inputEl.disabled = false;
+        sendBtn.disabled = false;
+        document.getElementById("paywall").style.display = "none";
         lockoutMsgEl.style.display = "none";
         lockoutMsgEl.textContent = "";
+
+        // If a session was active before page refresh/load, restart timer
+        if (localStorage.getItem('sage_sessionStart') && !sessionStart) {
+             sessionStart = parseInt(localStorage.getItem('sage_sessionStart'), 10);
+             if (Date.now() - sessionStart < (15 * 60 * 1000) && !sessionEnded) {
+                 startSessionTimer();
+             } else {
+                 // If session expired while page was closed, or after a donation expired
+                 endSession(); // This will re-apply lockout if needed or just end session
+             }
+        }
       }
     }
-    checkLockoutOnLoad();
 
-    if (history.length === 0 && !(isLockedOut() && !hasRecentDonation())) {
+    // Initial welcome message or lockout check
+    // Store sessionStart in localStorage to persist across refreshes
+    // This allows the timer to continue from where it left off, if the session hasn't expired.
+    inputEl.addEventListener('input', () => {
+        if (!sessionStart && !sessionEnded && !isLockedOut()) {
+            sessionStart = Date.now();
+            localStorage.setItem('sage_sessionStart', sessionStart);
+            startSessionTimer();
+        }
+    });
+
+
+    // Initial setup logic
+    checkLockoutOnLoad(); // Call this first to set initial state
+
+    if (history.length === 0 && !sessionEnded) { // Only add welcome if chat is empty and not locked out
       const welcome = "Hello! I'm Sage, your spiritual virtual therapist. 🌱\nHow can I support you today?";
       chatEl.innerHTML += `<div class="sage"><strong>Sage:</strong> ${welcome}</div>`;
       history.push({ role: "assistant", content: welcome });
     }
 
+
     async function sendMessage() {
-      if (sessionEnded) return;
+      // Re-check lockout and donation status before sending
+      if (isLockedOut() && !hasRecentDonation()) {
+        sessionEnded = true; // Ensure the session is marked as ended
+        inputEl.disabled = true;
+        sendBtn.disabled = true;
+        document.getElementById("paywall").style.display = "block";
+        const msg = lockoutMessage();
+        lockoutMsgEl.style.display = "block";
+        lockoutMsgEl.textContent = msg;
+        timerEl.textContent = "Session ended";
+        return; // Prevent message from being sent
+      }
+      if (sessionEnded) return; // If session ended due to timer, stop here
+
       const userMessage = inputEl.value.trim();
       if (!userMessage) return;
       chatEl.innerHTML += `<div class="user">You: ${escapeHTML(userMessage)}</div>`;
       chatEl.scrollTop = chatEl.scrollHeight;
       inputEl.value = "";
       history.push({ role: "user", content: userMessage });
-      startSessionTimer();
+
+      // Start the timer *after* the first message is sent
+      if (!sessionStart) { // Only start timer if it hasn't been started for this session
+         sessionStart = Date.now();
+         localStorage.setItem('sage_sessionStart', sessionStart);
+         startSessionTimer();
+      }
+
       spinnerEl.style.display = "block";
       const messages = [
         { role: "system", content: SYSTEM_PROMPT },
