@@ -669,18 +669,30 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
     }
 
     function donate(period) {
-      alert(`Thank you for supporting our mission with a ${period} donation!`);
-      setLastDonationTime();
-      clearLockout();
-      sessionEnded = false;
-      sessionStart = now();
-      inputEl.disabled = false;
-      sendBtn.disabled = false;
-      document.getElementById("paywall").style.display = "none";
-      timerEl.textContent = "";
-      lockoutMsgEl.style.display = "none";
-      lockoutMsgEl.textContent = "";
-      startSessionTimer();
+  alert(`Thank you for supporting our mission with a ${period} donation!`);
+  setLastDonationTime();
+  clearLockout();
+
+  // Restart session properly
+  sessionEnded = false;
+  sessionStart = Date.now();
+  inputEl.disabled = false;
+  sendBtn.disabled = false;
+  spinnerEl.style.display = "none";
+  document.getElementById("paywall").style.display = "none";
+  lockoutMsgEl.style.display = "none";
+  lockoutMsgEl.textContent = "";
+
+  // Reset and restart timer
+  clearInterval(timerInterval);
+  updateTimer();
+  timerInterval = setInterval(updateTimer, 1000);
+  setTimeout(endSession, 15 * 60 * 1000);
+
+  chatEl.innerHTML += `<div class="sage"><strong>Sage:</strong> Your session has been restored. How can I support you today?</div>`;
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
+
     }
 
     // On load or clear, check for lockout
