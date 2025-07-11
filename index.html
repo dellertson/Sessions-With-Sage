@@ -690,11 +690,8 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
   setTimeout(endSession, 15 * 60 * 1000);
 
   chatEl.innerHTML += `<div class="sage"><strong>Sage:</strong> Your session has been restored. How can I support you today?</div>`;
-  chatEl.scrollTop = chatEl.scrollHeight;
-}
-
-    
-
+  chatEl.scrollTop = chatEl.scrollHeight;  
+  }
     // On load or clear, check for lockout
     function checkLockoutOnLoad() {
       if (isLockedOut() && !hasRecentDonation()) {
