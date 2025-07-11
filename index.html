@@ -567,9 +567,11 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
       chatEl.innerHTML = "";
       // Reset all session state
       sessionStart = null;
+      localStorage.removeItem('sage_sessionStart'); // Clear persisted session start
       sessionEnded = false; // Crucial: allow sending messages again
       clearInterval(timerInterval); // Stop any running timer
       clearTimeout(sessionTimeout); // Clear any pending session end
+      clearLockout(); // Clear any lockout status
       timerEl.textContent = "";
       inputEl.disabled = false;
       sendBtn.disabled = false;
@@ -639,6 +641,7 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
 
       if (!sessionStart) {
         sessionStart = Date.now();
+        localStorage.setItem('sage_sessionStart', sessionStart); // Persist session start
       }
       updateTimer();
       timerInterval = setInterval(updateTimer, 1000);
@@ -668,6 +671,7 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
       spinnerEl.style.display = "none";
       clearInterval(timerInterval); // Ensure timer stops
       clearTimeout(sessionTimeout); // Ensure timeout is cleared
+      localStorage.removeItem('sage_sessionStart'); // Clear persisted session start
 
       if (!hasRecentDonation()) {
         setLockout();
@@ -675,6 +679,7 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
         chatEl.innerHTML += `<div class="sage"><strong>Sage:</strong> Your free session has ended. ${msg}</div>`;
         lockoutMsgEl.style.display = "block";
         lockoutMsgEl.textContent = msg;
+        document.getElementById("paywall").style.display = "block"; // Show paywall
       } else {
         chatEl.innerHTML += `<div class="sage"><strong>Sage:</strong> Your free session has ended. Thank you for your support! You may start a new session at any time.</div>`;
         lockoutMsgEl.style.display = "none";
@@ -688,7 +693,6 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
         // And restart timer if they were already in a session and it ended but donation makes it active
         startSessionTimer(); // Restart the timer and timeout
       }
-      document.getElementById("paywall").style.display = "block"; // Show paywall unless donation is recent
       timerEl.textContent = "Session ended";
     }
 
@@ -701,6 +705,7 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
       // Reset session state to active
       sessionEnded = false;
       sessionStart = Date.now(); // Start a new session timer from now
+      localStorage.setItem('sage_sessionStart', sessionStart); // Persist new session start
       inputEl.disabled = false;
       sendBtn.disabled = false;
       spinnerEl.style.display = "none";
@@ -745,29 +750,18 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
         lockoutMsgEl.textContent = "";
 
         // If a session was active before page refresh/load, restart timer
-        if (localStorage.getItem('sage_sessionStart') && !sessionStart) {
-             sessionStart = parseInt(localStorage.getItem('sage_sessionStart'), 10);
-             if (Date.now() - sessionStart < (15 * 60 * 1000) && !sessionEnded) {
+        const storedSessionStart = parseInt(localStorage.getItem('sage_sessionStart'), 10);
+        if (storedSessionStart > 0) { // Check if a session start time exists
+            sessionStart = storedSessionStart; // Restore sessionStart
+            if (Date.now() - sessionStart < (15 * 60 * 1000)) { // If session is still active
                  startSessionTimer();
-             } else {
-                 // If session expired while page was closed, or after a donation expired
-                 endSession(); // This will re-apply lockout if needed or just end session
-             }
+            } else {
+                 // If session expired while page was closed
+                 endSession(); // This will apply lockout if needed or just end session visually
+            }
         }
       }
     }
-
-    // Initial welcome message or lockout check
-    // Store sessionStart in localStorage to persist across refreshes
-    // This allows the timer to continue from where it left off, if the session hasn't expired.
-    inputEl.addEventListener('input', () => {
-        if (!sessionStart && !sessionEnded && !isLockedOut()) {
-            sessionStart = Date.now();
-            localStorage.setItem('sage_sessionStart', sessionStart);
-            startSessionTimer();
-        }
-    });
-
 
     // Initial setup logic
     checkLockoutOnLoad(); // Call this first to set initial state
@@ -801,10 +795,10 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
       inputEl.value = "";
       history.push({ role: "user", content: userMessage });
 
-      // Start the timer *after* the first message is sent
+      // Start the timer *after* the first message is sent, or if not already running
       if (!sessionStart) { // Only start timer if it hasn't been started for this session
          sessionStart = Date.now();
-         localStorage.setItem('sage_sessionStart', sessionStart);
+         localStorage.setItem('sage_sessionStart', sessionStart); // Persist session start
          startSessionTimer();
       }
 
