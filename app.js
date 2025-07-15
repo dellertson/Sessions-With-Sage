@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Set your public API URL for ngrok here:
-    window.SAGE_API_URL = "https://1827f4679046.ngrok-free.app/v1/chat/completions";
+    window.SAGE_API_URL = "https://ab5339d31544.ngrok-free.app/v1/chat/completions";
 
     // --- Dark mode support ---
     const darkSwitch = document.getElementById("darkmodeSwitch");
@@ -495,7 +495,7 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
         ...history
       ];
       try {
-        const API_URL = window.SAGE_API_URL || "https://1827f4679046.ngrok-free.app/v1/chat/completions";
+        const API_URL = window.SAGE_API_URL || "https://ab5339d31544.ngrok-free.app/v1/chat/completions";
         const res = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -519,4 +519,6 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
         spinnerEl.style.display = "none";
       }
     }
+    // expose to global scope
+window.sendMessage = sendMessage;
   }); // end DOMContentLoaded
