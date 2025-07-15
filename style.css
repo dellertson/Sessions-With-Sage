@@ -1,0 +1,254 @@
+:root {
+      --bg: #f4f4f4;
+      --container-bg: #fff;
+      --text: #333;
+      --chat-bg: #fafafa;
+      --sage: #665544;
+      --user: #222;
+      --paywall-bg: #fff4e6;
+      --paywall-border: #f4d0a1;
+      --border: #ccc;
+      --timer: #888;
+      --spinner: #888;
+      --button-bg: #fff;
+      --button-text: #333;
+      --disclaimer-bg: #fffbe8;
+      --disclaimer-color: #b55;
+      --disclaimer-border: #ffe5b4;
+      --legal-link: #a85c0c;
+      --legal-link-hover: #7a4100;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      transition: background 0.3s, color 0.3s;
+    }
+    .container {
+      max-width: 700px;
+      background: var(--container-bg);
+      padding: 2rem;
+      margin: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      transition: background 0.3s;
+      display: flex;
+      flex-direction: column;
+      min-height: 80vh;
+    }
+    .branding {
+      font-size: 1.2rem;
+      color: #6a899a;
+      margin-bottom: 0.3em;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+    .disclaimer {
+      background: var(--disclaimer-bg);
+      color: var(--disclaimer-color);
+      border: 1px solid var(--disclaimer-border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.7rem;
+      font-size: 0.96rem;
+    }
+    .mission {
+      background: #e7f1f7;
+      border: 1px solid #b3d5ef;
+      border-radius: 8px;
+      padding: 0.8rem 1rem;
+      margin-bottom: 1.1rem;
+      font-size: 1.05rem;
+      color: #2d5c7f;
+    }
+    body.dark .mission {
+      background: #1a2b33;
+      color: #b7e6fa;
+      border: 1px solid #375a6c;
+    }
+    .legal-links {
+      font-size: 0.94rem;
+      margin-top: 2.2rem;
+      margin-bottom: 0;
+      text-align: center;
+      width: 100%;
+    }
+    .legal-link-btn {
+      background: none;
+      border: none;
+      color: var(--legal-link);
+      text-decoration: underline;
+      cursor: pointer;
+      margin-right: 1.1em;
+      font-size: 1em;
+      font-family: inherit;
+      transition: color 0.2s;
+      padding: 0;
+    }
+    .legal-link-btn:last-child {
+      margin-right: 0;
+    }
+    .legal-link-btn:hover,
+    .legal-link-btn:focus {
+      color: var(--legal-link-hover);
+    }
+    .legal-content {
+      display: none;
+      text-align: left;
+      margin: 1em auto 0.5em auto;
+      padding: 1em 1em 0.5em 1em;
+      background: #f9f9f5;
+      border-radius: 8px;
+      border: 1px solid #e5d4b2;
+      max-width: 640px;
+      font-size: 0.97em;
+      color: #4b3e2e;
+      box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
+    }
+    .legal-content.open {
+      display: block;
+      animation: fadeIn 0.2s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px);}
+      to   { opacity: 1; transform: translateY(0);}
+    }
+    body.dark .legal-links .legal-content {
+      background: #2a2323;
+      border-color: #7d613a;
+      color: #e7cfa7;
+    }
+    body.dark .disclaimer {
+      background: #2b1c1c;
+      color: #ffaea6;
+      border: 1px solid #944;
+    }
+    body.dark .legal-link-btn {
+      color: #ffb55c;
+    }
+    body.dark .legal-link-btn:hover,
+    body.dark .legal-link-btn:focus {
+      color: #ffe3b0;
+    }
+    .chatbox {
+      height: 350px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      padding: 1rem;
+      border-radius: 8px;
+      background: var(--chat-bg);
+      margin-bottom: 1rem;
+      white-space: pre-wrap;
+      transition: background 0.3s, border 0.3s;
+    }
+    .user { font-weight: bold; color: var(--user);}
+    .sage { color: var(--sage); margin-bottom: 1rem; }
+    textarea, button {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      margin-top: 0.5rem;
+      border: 1px solid var(--border);
+      background: var(--button-bg);
+      color: var(--button-text);
+      transition: background 0.3s, color 0.3s, border 0.3s;
+    }
+    #paywall {
+      display: none;
+      margin-top: 2rem;
+      background: var(--paywall-bg);
+      padding: 1rem;
+      border: 1px solid var(--paywall-border);
+      border-radius: 8px;
+      transition: background 0.3s, border 0.3s;
+    }
+    #timer {
+      text-align: right;
+      color: var(--timer);
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+      transition: color 0.3s;
+    }
+    #spinner {
+      display: none;
+      text-align: left;
+      margin: 0.5rem 0 0.5rem 0;
+      color: var(--spinner);
+      font-style: italic;
+      transition: color 0.3s;
+    }
+    .sr-only {
+      position: absolute;
+      left: -10000px;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+    .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    #importInput {
+      display: none;
+    }
+    body.dark {
+      --bg: #181a1b;
+      --container-bg: #232627;
+      --text: #e0e0e0;
+      --chat-bg: #191c1d;
+      --sage: #e6ad7b;
+      --user: #c3e7fa;
+      --paywall-bg: #2d241a;
+      --paywall-border: #b38230;
+      --border: #333;
+      --timer: #aaa;
+      --spinner: #aaa;
+      --button-bg: #232627;
+      --button-text: #fafafa;
+      --disclaimer-bg: #2b1c1c;
+      --disclaimer-color: #ffaea6;
+      --disclaimer-border: #944;
+      --legal-link: #ffb55c;
+      --legal-link-hover: #ffe3b0;
+    }
+    .darkmode-switch {
+      position: absolute;
+      top: 18px;
+      right: 32px;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.2rem;
+      cursor: pointer;
+      z-index: 2;
+      padding: 0.25em 0.7em;
+      border-radius: 6px;
+      transition: background 0.3s, color 0.3s;
+    }
+    .darkmode-switch:focus {
+      outline: 2px solid var(--sage);
+    }
+    .container button {
+      background: var(--button-bg);
+      color: var(--button-text);
+    }
+    .lockout-message {
+      color: #b44;
+      font-weight: bold;
+      font-size: 1.02rem;
+      margin: 1.2em 0 0.7em 0;
+    }
+    body.dark .lockout-message {
+      color: #ff7e7e;
+    }
+    .spinner-above-input {
+      margin-bottom: 0.3em !important;
+      margin-top: 0 !important;
+    }
