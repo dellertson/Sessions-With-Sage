@@ -3,58 +3,94 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sessions-With-Sage: Virtual Therapist by Nonprofit</title>
+  <title>Sessions With Sage - Your Pocket Guide to Clarity</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <button class="darkmode-switch" id="darkmodeSwitch" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
   <div class="container">
-    <div class="branding">
-      Sessions-With-Sage<br>
-      <span style="font-size:1rem;color:#888;font-weight:normal;">A Project by Community Nonprofit</span>
-    </div>
-    <div class="mission">
-      <strong>Our Mission:</strong> We’re a community-driven nonprofit working to make mental health care more accessible for everyone. By offering a free and easy-to-use virtual therapist, we aim to support people who might not otherwise have access to therapy. Our mission is to break down the social, financial, and emotional barriers that keep too many people from getting the care they deserve—because healing should never be out of reach.
-    </div>
-    <div class="disclaimer">
-      <strong>Disclaimer:</strong> Sessions-With-Sage is operated by a nonprofit and is not a licensed therapist, counselor, or medical professional. The information and guidance provided are for informational and supportive purposes only and are not a substitute for professional advice, diagnosis, or treatment. If you are experiencing a crisis or mental health emergency, please contact a qualified professional or emergency services immediately.
-    </div>
-    <div id="timer" aria-live="polite"></div>
-    <div id="chat" class="chatbox" aria-label="Chat conversation" tabindex="0"></div>
-    <div id="spinner" class="spinner-above-input">Sage is typing...</div>
-    <label for="input" class="sr-only">Share what's on your heart</label>
-    <textarea id="input" placeholder="Share what's on your heart..." aria-label="Message input"></textarea>
-    <button id="sendBtn" onclick="sendMessage()" aria-label="Send message">Send</button>
-    <div class="btn-row" id="extraBtns"></div>
-    <div id="paywall" role="alertdialog" aria-modal="true">
-      <h3>Session Ended ⏳</h3>
-      <p>
-        Your free session has ended.<br>
-        Sessions-With-Sage is a public service of our nonprofit.<br>
-        If you wish to support our mission, please consider making a donation below.<br>
-        <em>No one will be turned away for lack of funds.</em>
-      </p>
-      <button onclick="donate('day')" aria-label="Donate for a day">Donate $2 (Keep Sage Online for a Day)</button>
-      <button onclick="donate('week')" aria-label="Donate for a week">Donate $5 (One Week)</button>
-      <button onclick="donate('month')" aria-label="Donate for a month">Donate $12 (One Month)</button>
-      <div style="margin-top:0.8em;font-size:0.92em;color:#888;">
-        <strong>All donations support our free mental health programs.</strong>
-      </div>
-      <div id="lockoutMsg" class="lockout-message" style="display:none"></div>
-    </div>
-    <div class="legal-links" id="legalLinks">
-      <button type="button" class="legal-link-btn" data-legal="terms">Terms of Service</button>
-      <button type="button" class="legal-link-btn" data-legal="privacy">Privacy Policy</button>
-      <button type="button" class="legal-link-btn" data-legal="disclaimer">Full Disclaimer</button>
-      <button type="button" class="legal-link-btn" data-legal="mission">Our Mission</button>
-      <div id="legal-terms" class="legal-content"></div>
-      <div id="legal-privacy" class="legal-content"></div>
-      <div id="legal-disclaimer" class="legal-content"></div>
-      <div id="legal-mission" class="legal-content"></div>
-    </div>
-  </div>
-  <input type="file" id="importInput" accept=".txt" aria-label="Import conversation text file">
+    <header>
+      <h1><span class="icon">🌿</span> Sessions With Sage</h1>
+      <p class="subtitle">Your Pocket Guide to Clarity, Calm, and Compassion.</p>
+    </header>
 
-  <script src="app.js"></script>
+    <main id="main-content">
+      <section class="intro-section">
+        <h2>Feel stuck? Overwhelmed? Looking for clarity?</h2>
+        <p>Sage is here to listen, guide, and help you reconnect with yourself—anytime, anywhere.</p>
+        <div class="button-group">
+          <button class="btn btn-primary start-session-btn">Start Your Free Session</button>
+        </div>
+        <div id="session-message" class="session-feedback"></div>
+      </section>
+
+      <section class="features-section">
+        <h2>🧘‍♂️ A Gentle Companion in Your Pocket</h2>
+        <p>Sage isn’t a replacement for therapy—but sometimes, you just need a gentle nudge, a moment to breathe, or a little wisdom to get through the day.</p>
+        <ul class="feature-list">
+          <li>Reflect on your feelings</li>
+          <li>Work through life’s challenges</li>
+          <li>Discover calming affirmations</li>
+          <li>Reconnect with your purpose</li>
+        </ul>
+      </section>
+
+      <section class="free-tier-section">
+        <h2>💬 Try Sage for Free</h2>
+        <p>Your first 15 minutes every day are completely free—no strings attached.</p>
+        <p class="quote">“Support when you need it. Freedom when you want it.”</p>
+      </section>
+
+      <section class="support-section" id="support">
+        <h2>❤️ Support Sage, Support Yourself</h2>
+        <p>This project exists because of people like you. Your support keeps it alive for everyone.</p>
+        <table class="pricing-table">
+          <thead><tr><th>Plan</th><th>What You Get</th><th>Contribution</th></tr></thead>
+          <tbody>
+            <tr><td class="plan-name">Daily Reset</td><td>Unlimited access for 24 hours</td><td class="plan-price">$1.99/day</td></tr>
+            <tr><td class="plan-name">Weekly Care Plan</td><td>Unlimited chat + journaling</td><td class="plan-price">$7.99/week</td></tr>
+            <tr><td class="plan-name">Monthly Wellness Pass</td><td>Unlimited chat, mood tracker, affirmations</td><td class="plan-price">$19.99/month</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top: 1.5rem;">Every contribution helps us grow this supportive space for all.</p>
+      </section>
+
+      <section class="pay-what-you-can-section">
+          <h2>🎁 Pay What You Can</h2>
+          <p>Can’t commit? No worries. You can always donate whatever feels right after your session.</p>
+      </section>
+
+      <section class="final-cta">
+        <h2>✨ Your Journey, Your Pace</h2>
+        <p>Sage is always here. Whether you visit for a quick reflection or stay for a longer chat, you are welcome.</p>
+        <p><strong>No pressure. No judgment. Just wisdom and kindness.</strong></p>
+        <div class="button-group">
+          <button class="btn btn-primary start-session-btn">Start your first session now — it’s free.</button>
+          <a href="#support" class="btn btn-secondary">Support the Project</a>
+        </div>
+      </section>
+    </main>
+
+    <section id="chat-section" class="section">
+      <div id="timer" aria-live="polite"></div>
+      <div id="chat" class="chatbox" aria-label="Chat conversation" tabindex="0"></div>
+      <div id="spinner">Sage is typing...</div>
+      <textarea id="input" placeholder="Share what's on your heart..." aria-label="Message input" disabled></textarea>
+      <button id="sendBtn" disabled>Send</button>
+      <div class="btn-row" id="extraBtns"></div>
+      <input type="file" id="importInput" accept=".txt" aria-label="Import conversation text file">
+      <div id="session-ended-msg">
+        <p>Your free daily session has ended.</p>
+        <p>For unlimited access, please consider one of our support plans. Every contribution helps keep Sage available for everyone.</p>
+        <a href="#support" class="btn btn-secondary">See Support Plans</a>
+      </div>
+    </section>
+
+    <footer class="footer">
+        <p>&copy; 2024 Sessions With Sage. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
