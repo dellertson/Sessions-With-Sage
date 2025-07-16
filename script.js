@@ -119,7 +119,7 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
 
     //change session duration here
 
-    const sessionDuration = 240 * 60 * 1000;
+    const sessionDuration = 1000 * 60 * 1000;
     const sessionStartTime = Date.now();
     
     function updateTimerDisplay() {
