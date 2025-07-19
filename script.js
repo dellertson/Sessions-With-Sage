@@ -233,7 +233,7 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
       renderHistory();
     } catch (err) {
       console.error(err);
-      history.push({ role: "assistant", content: "Error contacting Sage. Please try again." });
+      history.push({ role: "assistant", content: "Sage is another session. Please try again." });
       saveHistory();
       renderHistory();
     } finally {
