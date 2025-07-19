@@ -113,13 +113,13 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
     sendBtn.disabled = false;
     inputEl.focus();
     
-    const welcome = "Hello! I'm Sage, your spiritual virtual therapist. 🌱\nHow can I support you today? Your free 15-minute session starts now.";
+    const welcome = "Hello! I'm Sage, your guide to clarity, calm, and compassion. 🌱\nHow can I support you today? Your free 15-minute session starts now.";
     chatEl.innerHTML = `<div class="sage"><strong>Sage:</strong> ${welcome}</div>`;
     history.push({ role: "assistant", content: welcome });
 
     //change session duration here
 
-    const sessionDuration = 1000 * 60 * 1000;
+    const sessionDuration = 15 * 60 * 1000;
     const sessionStartTime = Date.now();
     
     function updateTimerDisplay() {
