@@ -138,7 +138,7 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
       //change session time here
     const sessionState = {
       startTime: Date.now(),
-      duration: 15 * 60 * 1000,
+      duration: 30 * 60 * 1000,
       date: getTodayString()
     };
     localStorage.setItem('sage_sessionState', JSON.stringify(sessionState));
