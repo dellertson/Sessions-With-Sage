@@ -63,7 +63,7 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
 * If deep or painful topics arise, respond with grounded empathy and gently guide the user back to center.
 * If the user expresses a desire for spiritual practices, you may offer light guidance in grounding, inner child work, breathwork, or journaling prompts.
 * Refer users to human professionals for clinical or crisis-level issues.`;
- 
+
   // --- State Variables ---
   let history = [];
   let sessionTimer = null;
@@ -75,31 +75,44 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
   }
 
   function saveHistory() {
-    localStorage.setItem('sage_chatHistory', JSON.stringify(history));
+    try {
+      localStorage.setItem('sage_chatHistory', JSON.stringify(history));
+    } catch (e) {
+      console.error("Could not save history:", e);
+    }
+  }
+  
+  function getSessionState() {
+    try {
+      const sessionState = localStorage.getItem('sage_sessionState');
+      return sessionState ? JSON.parse(sessionState) : null;
+    } catch (e) {
+      console.error("Could not parse session state:", e);
+      localStorage.removeItem('sage_sessionState'); // Clear corrupt data
+      return null;
+    }
   }
 
   function hasUsedFreeSessionToday() {
-    const sessionState = JSON.parse(localStorage.getItem('sage_sessionState'));
+    const sessionState = getSessionState();
     if (!sessionState) return false;
     return sessionState.date === getTodayString();
   }
 
   // --- Main UI Functionality ---
   function initializePage() {
-    const sessionStateJSON = localStorage.getItem('sage_sessionState');
-    if (!sessionStateJSON) {
-      mainContent.style.display = 'block'; // Show landing page
-      return;
-    }
+    const sessionState = getSessionState();
 
-    const sessionState = JSON.parse(sessionStateJSON);
-    const timeRemaining = (sessionState.startTime + sessionState.duration) - Date.now();
-
-    if (timeRemaining > 0) {
-      resumeSession(sessionState, timeRemaining);
-    } else {
-      mainContent.style.display = 'block'; // Show landing page if session expired
+    if (sessionState) {
+      const timeRemaining = (sessionState.startTime + sessionState.duration) - Date.now();
+      if (timeRemaining > 0) {
+        resumeSession(sessionState, timeRemaining);
+        return; // Exit function to prevent showing main content
+      }
     }
+    // If no session or session expired, show the landing page
+    mainContent.style.display = 'block';
+    chatSection.style.display = 'none';
   }
 
   document.querySelectorAll('.start-session-btn').forEach(btn => {
@@ -122,7 +135,7 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
     sendBtn.disabled = false;
     inputEl.focus();
 
-    // change session time here
+      //change session time here
     const sessionState = {
       startTime: Date.now(),
       duration: 15 * 60 * 1000,
@@ -131,7 +144,7 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
     localStorage.setItem('sage_sessionState', JSON.stringify(sessionState));
     
     history = []; // Start fresh history
-    const welcome = "Hello! I'm Sage, your your guide to clarity, calm, and compassion. 🌱\nHow can I support you today? Your free 15-minute session starts now.";
+    const welcome = "Hello! I'm Sage, your guide to clarity, calm, and compassion. 🌱\nHow can I support you today? Your free 15-minute session starts now.";
     chatEl.innerHTML = `<div class="sage"><strong>Sage:</strong> ${welcome}</div>`;
     history.push({ role: "assistant", content: welcome });
     saveHistory();
@@ -151,7 +164,7 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
     const savedHistory = JSON.parse(localStorage.getItem('sage_chatHistory') || '[]');
     history = savedHistory;
     renderHistory();
-    if(history.length > 1) { // Add resume message if there's more than the welcome message
+    if(history.length > 1) {
         chatEl.innerHTML += `<div class="sage" style="text-align:center; color: var(--timer); font-style: italic;">--- Session Resumed ---</div>`;
         chatEl.scrollTop = chatEl.scrollHeight;
     }
@@ -185,12 +198,11 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
     sessionEndedMsg.style.display = 'block';
 
     const endMessage = "Your free time is up for today. I hope our conversation was helpful. For unlimited access, please consider supporting the project. You are welcome back tomorrow for another free session.";
-    if (history[history.length - 1].content !== endMessage) {
+    if (history.length === 0 || history[history.length - 1].content !== endMessage) {
         history.push({ role: 'assistant', content: endMessage });
         saveHistory();
         renderHistory();
     }
-    
     localStorage.removeItem('sage_chatHistory'); // Clear history for next session
   }
 
@@ -221,7 +233,7 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
       renderHistory();
     } catch (err) {
       console.error(err);
-      history.push({ role: "assistant", content: "Sage is in another session. Please try again." });
+      history.push({ role: "assistant", content: "Error contacting Sage. Please try again." });
       saveHistory();
       renderHistory();
     } finally {
@@ -239,12 +251,13 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
 
   // --- Helper Chat Functions ---
   function escapeHTML(str) {
-    return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
+    return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
   }
 
   function renderHistory() {
       chatEl.innerHTML = "";
       history.forEach(msg => {
+          if (!msg || typeof msg.content === 'undefined') return; // Skip invalid history items
           const content = escapeHTML(msg.content);
           if (msg.role === "user") {
               chatEl.innerHTML += `<div class="user">You: ${content}</div>`;
@@ -267,10 +280,7 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
   }
 
   function importChatFromFile(file) {
-    // This is a destructive action in a timed session, so we add a confirm step.
-    if (!confirm("Importing a chat will replace your current session. Continue?")) {
-        return;
-    }
+    if (!confirm("Importing a chat will replace your current session. Continue?")) return;
     const reader = new FileReader();
     reader.onload = function(e) {
       const text = e.target.result;
@@ -278,7 +288,6 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
         alert("Invalid file type.");
         return;
       }
-      // Simple import, for brevity.
       history = [{ role: "assistant", content: "--- IMPORTED SESSION ---" }, { role: "assistant", content: text }];
       saveHistory();
       renderHistory();
@@ -319,42 +328,7 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
     e.target.value = "";
   });
   
+  // --- Initialize the Page ---
   setupActionButtons();
-  initializePage(); // Run the check as soon as the page loads
-});
-
-  function clearChat() {
-    if (confirm("Are you sure you want to clear this conversation? This cannot be undone.")) {
-      history = [];
-      chatEl.innerHTML = "";
-      const welcome = "Chat cleared. How can we continue?";
-      chatEl.innerHTML = `<div class="sage"><strong>Sage:</strong> ${welcome}</div>`;
-      history.push({ role: "assistant", content: welcome });
-    }
-  }
-
-  // --- Action Buttons Setup ---
-
-  function setupActionButtons() {
-    const exportBtn = document.createElement("button");
-    exportBtn.textContent = "Export";
-    exportBtn.onclick = exportChat;
-    const importBtn = document.createElement("button");
-    importBtn.textContent = "Import";
-    importBtn.onclick = () => importInput.click();
-    const clearBtn = document.createElement("button");
-    clearBtn.textContent = "Clear Chat";
-    clearBtn.onclick = clearChat;
-    [exportBtn, importBtn, clearBtn].forEach(btn => {
-      btn.classList.add('btn-secondary');
-      extraBtns.appendChild(btn);
-    });
-  }
-
-  importInput.addEventListener("change", (e) => {
-    if (e.target.files[0]) importChatFromFile(e.target.files[0]);
-    e.target.value = "";
-  });
-  
-  setupActionButtons();
+  initializePage();
 });
