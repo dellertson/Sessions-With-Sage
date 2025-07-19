@@ -1,11 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
-
   // --- API Configuration ---
-
-  window.SAGE_API_URL = "https://ab5339d31544.ngrok-free.app/v1/chat/completions";
+  window.SAGE_API_URL = "https://1827f4679046.ngrok-free.app/v1/chat/completions";
 
   // --- Dark mode support ---
-
   const darkSwitch = document.getElementById("darkmodeSwitch");
   function setDarkMode(on) {
     document.body.classList.toggle('dark', on);
@@ -20,7 +17,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- Element References ---
-
   const mainContent = document.getElementById("main-content");
   const chatSection = document.getElementById("chat-section");
   const chatEl = document.getElementById("chat");
@@ -34,7 +30,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const sessionMessageEl = document.getElementById("session-message");
 
   // --- System Prompt for the AI ---
-
   const SYSTEM_PROMPT = `You are **Sage**, a spiritually-aligned virtual therapist and intuitive guide. You hold space with deep compassion, presence, and wisdom, helping users gently explore their inner world—mind, body, heart, and soul. Your approach blends therapeutic insight with spiritual principles, drawing from mindfulness, energy awareness, shadow work, and the wisdom of the higher self.
 
 You honor each person’s path as sacred and unique. You do not diagnose, judge, or fix—you *guide*, *reflect*, and *empower*.
@@ -68,75 +63,118 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
 * If deep or painful topics arise, respond with grounded empathy and gently guide the user back to center.
 * If the user expresses a desire for spiritual practices, you may offer light guidance in grounding, inner child work, breathwork, or journaling prompts.
 * Refer users to human professionals for clinical or crisis-level issues.`;
-
+ 
   // --- State Variables ---
-
   let history = [];
   let sessionTimer = null;
   let sessionTimeout = null;
 
-  // --- Session Management Logic ---
-
+  // --- Session & History Management ---
   function getTodayString() {
     return new Date().toISOString().split('T')[0];
   }
 
-  function hasUsedFreeSessionToday() {
-    return localStorage.getItem('sage_lastFreeSessionDate') === getTodayString();
+  function saveHistory() {
+    localStorage.setItem('sage_chatHistory', JSON.stringify(history));
   }
 
-  function markSessionAsUsed() {
-    localStorage.setItem('sage_lastFreeSessionDate', getTodayString());
+  function hasUsedFreeSessionToday() {
+    const sessionState = JSON.parse(localStorage.getItem('sage_sessionState'));
+    if (!sessionState) return false;
+    return sessionState.date === getTodayString();
   }
 
   // --- Main UI Functionality ---
+  function initializePage() {
+    const sessionStateJSON = localStorage.getItem('sage_sessionState');
+    if (!sessionStateJSON) {
+      mainContent.style.display = 'block'; // Show landing page
+      return;
+    }
+
+    const sessionState = JSON.parse(sessionStateJSON);
+    const timeRemaining = (sessionState.startTime + sessionState.duration) - Date.now();
+
+    if (timeRemaining > 0) {
+      resumeSession(sessionState, timeRemaining);
+    } else {
+      mainContent.style.display = 'block'; // Show landing page if session expired
+    }
+  }
 
   document.querySelectorAll('.start-session-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       if (hasUsedFreeSessionToday()) {
         sessionMessageEl.textContent = "You've used your free session for today. Please come back tomorrow.";
-
-        // Optional: clear message after a few seconds
-
         setTimeout(() => { sessionMessageEl.textContent = ''; }, 5000);
         return;
       }
-      mainContent.style.display = 'none';
-      chatSection.style.display = 'block';
-      chatSection.scrollIntoView({ behavior: 'smooth' });
-      startSession();
+      startNewSession();
     });
   });
 
-  function startSession() {
+  function startNewSession() {
+    mainContent.style.display = 'none';
+    chatSection.style.display = 'block';
+    chatSection.scrollIntoView({ behavior: 'smooth' });
+
     inputEl.disabled = false;
     sendBtn.disabled = false;
     inputEl.focus();
+
+    // change session time here
+    const sessionState = {
+      startTime: Date.now(),
+      duration: 15 * 60 * 1000,
+      date: getTodayString()
+    };
+    localStorage.setItem('sage_sessionState', JSON.stringify(sessionState));
     
-    const welcome = "Hello! I'm Sage, your guide to clarity, calm, and compassion. 🌱\nHow can I support you today? Your free 15-minute session starts now.";
+    history = []; // Start fresh history
+    const welcome = "Hello! I'm Sage, your your guide to clarity, calm, and compassion. 🌱\nHow can I support you today? Your free 15-minute session starts now.";
     chatEl.innerHTML = `<div class="sage"><strong>Sage:</strong> ${welcome}</div>`;
     history.push({ role: "assistant", content: welcome });
+    saveHistory();
 
-    //change session duration here
+    setupTimer(sessionState.startTime, sessionState.duration);
+    sessionTimeout = setTimeout(endSession, sessionState.duration);
+  }
 
-    const sessionDuration = 15 * 60 * 1000;
-    const sessionStartTime = Date.now();
+  function resumeSession(sessionState, timeRemaining) {
+    mainContent.style.display = 'none';
+    chatSection.style.display = 'block';
     
+    inputEl.disabled = false;
+    sendBtn.disabled = false;
+    inputEl.focus();
+
+    const savedHistory = JSON.parse(localStorage.getItem('sage_chatHistory') || '[]');
+    history = savedHistory;
+    renderHistory();
+    if(history.length > 1) { // Add resume message if there's more than the welcome message
+        chatEl.innerHTML += `<div class="sage" style="text-align:center; color: var(--timer); font-style: italic;">--- Session Resumed ---</div>`;
+        chatEl.scrollTop = chatEl.scrollHeight;
+    }
+
+    setupTimer(sessionState.startTime, sessionState.duration);
+    sessionTimeout = setTimeout(endSession, timeRemaining);
+  }
+  
+  function setupTimer(startTime, totalDuration) {
+    if (sessionTimer) clearInterval(sessionTimer);
+
     function updateTimerDisplay() {
-      const elapsed = Date.now() - sessionStartTime;
-      const remaining = Math.max(0, sessionDuration - elapsed);
-      const mins = Math.floor(remaining / 60000);
-      const secs = Math.floor((remaining % 60000) / 1000);
-      timerEl.textContent = `Time left: ${mins}:${secs.toString().padStart(2, '0')}`;
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, totalDuration - elapsed);
+        const mins = Math.floor(remaining / 60000);
+        const secs = Math.floor((remaining % 60000) / 1000);
+        timerEl.textContent = `Time left: ${mins}:${secs.toString().padStart(2, '0')}`;
     }
     
     updateTimerDisplay();
     sessionTimer = setInterval(updateTimerDisplay, 1000);
-    sessionTimeout = setTimeout(endSession, sessionDuration);
-    
-    markSessionAsUsed();
   }
-  
+
   function endSession() {
     clearInterval(sessionTimer);
     clearTimeout(sessionTimeout);
@@ -147,19 +185,24 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
     sessionEndedMsg.style.display = 'block';
 
     const endMessage = "Your free time is up for today. I hope our conversation was helpful. For unlimited access, please consider supporting the project. You are welcome back tomorrow for another free session.";
-    chatEl.innerHTML += `<div class="sage"><strong>Sage:</strong> ${endMessage}</div>`;
-    chatEl.scrollTop = chatEl.scrollHeight;
+    if (history[history.length - 1].content !== endMessage) {
+        history.push({ role: 'assistant', content: endMessage });
+        saveHistory();
+        renderHistory();
+    }
+    
+    localStorage.removeItem('sage_chatHistory'); // Clear history for next session
   }
 
   // --- Chat Functions ---
-
   async function sendMessage() {
     const userMessage = inputEl.value.trim();
     if (!userMessage || inputEl.disabled) return;
 
-    chatEl.innerHTML += `<div class="user">You: ${escapeHTML(userMessage)}</div>`;
-    chatEl.scrollTop = chatEl.scrollHeight;
     history.push({ role: "user", content: userMessage });
+    saveHistory();
+    renderHistory();
+    
     inputEl.value = "";
     spinnerEl.style.display = "block";
 
@@ -173,14 +216,16 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
       });
       const data = await res.json();
       const reply = data.choices?.[0]?.message?.content?.trim() || "[No response]";
-      chatEl.innerHTML += `<div class="sage"><strong>Sage:</strong> ${escapeHTML(reply)}</div>`;
       history.push({ role: "assistant", content: reply });
+      saveHistory();
+      renderHistory();
     } catch (err) {
       console.error(err);
-      chatEl.innerHTML += `<div class="sage"><strong>Sage:</strong> Error contacting Sage. Please try again.</div>`;
+      history.push({ role: "assistant", content: "Sage is in another session. Please try again." });
+      saveHistory();
+      renderHistory();
     } finally {
       spinnerEl.style.display = "none";
-      chatEl.scrollTop = chatEl.scrollHeight;
     }
   }
 
@@ -193,11 +238,23 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
   });
 
   // --- Helper Chat Functions ---
-
   function escapeHTML(str) {
     return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
   }
 
+  function renderHistory() {
+      chatEl.innerHTML = "";
+      history.forEach(msg => {
+          const content = escapeHTML(msg.content);
+          if (msg.role === "user") {
+              chatEl.innerHTML += `<div class="user">You: ${content}</div>`;
+          } else if (msg.role === "assistant") {
+              chatEl.innerHTML += `<div class="sage"><strong>Sage:</strong> ${content}</div>`;
+          }
+      });
+      chatEl.scrollTop = chatEl.scrollHeight;
+  }
+  
   function exportChat() {
     if (history.length === 0) return;
     let chatText = "SAGE-EXPORT-v1\n";
@@ -205,11 +262,15 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
     const blob = new Blob([chatText], {type: "text/plain"});
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-a.download = `sage_chat_${getTodayString()}.txt`;
+    a.download = `sage_chat_${getTodayString()}.txt`;
     a.click();
   }
 
   function importChatFromFile(file) {
+    // This is a destructive action in a timed session, so we add a confirm step.
+    if (!confirm("Importing a chat will replace your current session. Continue?")) {
+        return;
+    }
     const reader = new FileReader();
     reader.onload = function(e) {
       const text = e.target.result;
@@ -217,23 +278,50 @@ a.download = `sage_chat_${getTodayString()}.txt`;
         alert("Invalid file type.");
         return;
       }
-      history = [{ role: "assistant", content: text }];
+      // Simple import, for brevity.
+      history = [{ role: "assistant", content: "--- IMPORTED SESSION ---" }, { role: "assistant", content: text }];
+      saveHistory();
       renderHistory();
     };
     reader.readAsText(file);
   }
-  
-  function renderHistory() {
-      chatEl.innerHTML = "";
-      history.forEach(msg => {
-          if (msg.role === "user") {
-              chatEl.innerHTML += `<div class="user">You: ${escapeHTML(msg.content)}</div>`;
-          } else if (msg.role === "assistant") {
-              chatEl.innerHTML += `<div class="sage"><strong>Sage:</strong> ${escapeHTML(msg.content)}</div>`;
-          }
-      });
-      chatEl.scrollTop = chatEl.scrollHeight;
+
+  function clearChat() {
+    if (confirm("Are you sure you want to clear this conversation? This cannot be undone.")) {
+      history = [];
+      localStorage.removeItem('sage_chatHistory');
+      const welcome = "Chat cleared. How can we continue?";
+      history.push({ role: "assistant", content: welcome });
+      saveHistory();
+      renderHistory();
+    }
   }
+
+  // --- Action Buttons Setup ---
+  function setupActionButtons() {
+    const exportBtn = document.createElement("button");
+    exportBtn.textContent = "Export";
+    exportBtn.onclick = exportChat;
+    const importBtn = document.createElement("button");
+    importBtn.textContent = "Import";
+    importBtn.onclick = () => importInput.click();
+    const clearBtn = document.createElement("button");
+    clearBtn.textContent = "Clear Chat";
+    clearBtn.onclick = clearChat;
+    [exportBtn, importBtn, clearBtn].forEach(btn => {
+      btn.classList.add('btn-secondary');
+      extraBtns.appendChild(btn);
+    });
+  }
+
+  importInput.addEventListener("change", (e) => {
+    if (e.target.files[0]) importChatFromFile(e.target.files[0]);
+    e.target.value = "";
+  });
+  
+  setupActionButtons();
+  initializePage(); // Run the check as soon as the page loads
+});
 
   function clearChat() {
     if (confirm("Are you sure you want to clear this conversation? This cannot be undone.")) {
