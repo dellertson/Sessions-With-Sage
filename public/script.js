@@ -308,7 +308,7 @@ importInput.addEventListener("change", (e) => {
 });
 
 // --- Stripe Integration ---
-const stripe = Stripe('pk_test_51PJtM7SDgPpB1BQj9Mq3nSJ6qG7dJ3K4Xl7H2d4zT5b0q8Fc7L9wZv6A1f5yX7r8W0dN9k3Q6'); // Replace with your publishable key if needed
+const stripe = Stripe('pk_test_51Rj6hJ2M8hhdRIEsSeqnNYuuRUsYM10uqGgqJDfaNS7gciXk4j2sEu8k2Ea0D9hLR3V8GqwtojV8Ma0TxIFkllXs00fwt049rT'); // Replace with your publishable key if needed
 const elements = stripe.elements();
 let cardElement;
 const stripeModal = document.getElementById('stripe-modal');
