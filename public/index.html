@@ -128,17 +128,28 @@
     </main>
 
     <section id="chat-section" class="section">
-      <div id="timer" aria-live="polite"></div>
+      <div class="chat-header">
+        <div id="timer" aria-live="polite"></div>
+        <div class="chat-menu">
+            <button id="chat-menu-btn" class="chat-menu-button" aria-label="Chat Options">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-4.44a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.38"/><path d="M18.36 2.64a2.12 2.12 0 0 1 3 3L12.5 15H9.5v-3L18.36 2.64z"/></svg>
+            </button>
+            <div id="chat-dropdown" class="chat-dropdown-content">
+                <a href="#" id="export-btn">Export Chat</a>
+                <a href="#" id="import-btn">Import Chat</a>
+                <a href="#" id="clear-btn" class="danger-option">Clear Chat</a>
+            </div>
+        </div>
+      </div>
       <div id="chat" class="chatbox" aria-label="Chat conversation" tabindex="0"></div>
       <div id="spinner">Sage is typing...</div>
       <textarea id="input" placeholder="Share what's on your heart..." aria-label="Message input" disabled></textarea>
       <button id="sendBtn" disabled>Send</button>
-      <div class="btn-row" id="extraBtns"></div>
       <input type="file" id="importInput" accept=".txt" aria-label="Import conversation text file">
       <div id="session-ended-msg">
         <p>Your free daily session has ended.</p>
         <p>For unlimited access, please consider one of our support plans. Every contribution helps keep Sage available for everyone.</p>
-        <a href="#support" class="btn btn-secondary">See Support Plans</a>
+        <a href="#support" class="btn btn-secondary" id="see-plans-btn">See Support Plans</a>
       </div>
     </section>
 
@@ -149,4 +160,5 @@
 
   <script src="script.js"></script>
 </body>
-</html> 
+</html>
+
