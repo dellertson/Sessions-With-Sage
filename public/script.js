@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     // --- API Configuration ---
-    window.SAGE_API_URL = "https://ab5339d31544.ngrok-free.app/v1/chat/completions";
+    window.SAGE_API_URL = "https://f248f029dcc2.ngrok-free.app/v1/chat/completions";
 
     // --- Element References ---
     const darkSwitch = document.getElementById("darkmodeSwitch");
