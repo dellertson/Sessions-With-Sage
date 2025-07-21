@@ -50,6 +50,7 @@ body.dark {
 }
 .container {
   max-width: 800px;
+  width: 100%;
   background: transparent;
   padding: 0;
 }
@@ -107,7 +108,7 @@ p, .feature-list li {
 .final-cta h2 { color: var(--primary); }
 .footer { font-size: 0.9em; color: #777; margin-top: 2em; }
 body.dark .footer { color: #aaa; }
-.darkmode-switch { position: fixed; top: 18px; right: 32px; background: none; border: none; color: var(--text); font-size: 1.2rem; cursor: pointer; z-index: 1001; padding: 0.25em 0.7em; border-radius: 6px; transition: background 0.3s, color 0.3s; }
+.darkmode-switch { position: fixed; top: 10px; right: 10px; background: none; border: none; color: var(--text); font-size: 1.5rem; cursor: pointer; z-index: 1001; padding: 0.25em 0.7em; border-radius: 6px; transition: background 0.3s, color 0.3s; }
 .darkmode-switch:focus { outline: 2px solid var(--sage); }
 
 /* Chat Interface Styles */
@@ -115,7 +116,7 @@ body.dark .footer { color: #aaa; }
 .chatbox { height: 350px; overflow-y: auto; border: 1px solid var(--border); padding: 1rem; border-radius: 8px; background: var(--chat-bg); margin-bottom: 1rem; white-space: pre-wrap; transition: background 0.3s, border 0.3s; text-align: left; }
 .user { font-weight: bold; color: var(--user); }
 .sage { color: var(--sage); margin-bottom: 1rem; }
-#chat-section textarea, #chat-section button { width: 100%; padding: 1rem; font-size: 1rem; border-radius: 8px; margin-top: 0.5rem; border: 1px solid var(--border); background: var(--button-bg); color: var(--button-text); font-family: 'Segoe UI', sans-serif; transition: background 0.3s, color 0.3s, border 0.3s; }
+#chat-section textarea, #chat-section button { width: 100%; padding: 1rem; font-size: 1rem; border-radius: 8px; margin-top: 0.5rem; border: 1px solid var(--border); background: var(--button-bg); color: var(--button-text); font-family: 'Segoe UI', sans-serif; transition: background 0.3s, color 0.3s, border 0.3s; box-sizing: border-box; }
 #chat-section textarea { background: var(--card-bg); color: var(--text); }
 #timer { text-align: right; color: var(--timer); margin-bottom: 0.5rem; font-size: 0.95rem; transition: color 0.3s; }
 #spinner { display: none; text-align: left; margin: 0.5rem 0 0.5rem 0; color: var(--spinner); font-style: italic; transition: color 0.3s; }
@@ -144,12 +145,14 @@ body.dark .footer { color: #aaa; }
   z-index: 1000;
   align-items: center;
   justify-content: center;
+  padding: 1rem;
+  box-sizing: border-box;
 }
 .stripe-modal-content {
   background: var(--card-bg);
   border-radius: 12px;
   padding: 2rem;
-  width: 90%;
+  width: 100%;
   max-width: 500px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
@@ -213,4 +216,72 @@ body.dark .footer { color: #aaa; }
   color: var(--primary);
   margin-bottom: 1rem;
   line-height: 1;
+}
+
+/*
+ ============================================
+  MOBILE RESPONSIVE STYLES
+ ============================================
+*/
+@media (max-width: 768px) {
+  body {
+    padding: 1rem 0.5rem;
+  }
+  .section {
+    padding: 2rem 1rem;
+    margin-bottom: 2rem;
+  }
+  h1 {
+    font-size: 2rem;
+  }
+  h2 {
+    font-size: 1.5rem;
+  }
+  p, .feature-list li {
+    font-size: 1rem;
+  }
+  .btn {
+    padding: 0.8rem 1.2rem;
+    font-size: 1rem;
+  }
+
+  /* Responsive Pricing Table */
+  .pricing-table {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .pricing-table thead {
+    display: none; /* Hide table header on mobile */
+  }
+  .pricing-table tr {
+    display: block;
+    border-bottom: 2px solid var(--primary);
+  }
+  .pricing-table tr:last-child {
+    border-bottom: none;
+  }
+  .pricing-table td {
+    display: block;
+    text-align: right; /* Align content to the right */
+    padding-left: 50%; /* Create space for the label */
+    position: relative;
+    border-bottom: 1px solid var(--border);
+  }
+  .pricing-table td:last-child {
+    border-bottom: none;
+  }
+  .pricing-table td::before {
+    content: attr(data-label); /* Use data-label for the heading */
+    position: absolute;
+    left: 1rem;
+    width: calc(50% - 2rem);
+    text-align: left;
+    font-weight: bold;
+    color: var(--primary);
+  }
+  .pricing-table .plan-action {
+    text-align: right;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
 }
