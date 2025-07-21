@@ -246,7 +246,7 @@ These rules are absolute and must be followed at all times to maintain the integ
     let currentPayment = { amount: 0, type: '', description: '' };
     function initStripe() {
         if (typeof Stripe === 'undefined') { console.error('Stripe.js has not loaded'); return; }
-        stripe = Stripe('pk_test_51Rj6hJ2M8hhdRIEsSeqnNYuuRUsYM10uqGgqJDfaNS7gciXk4j2sEu8k2Ea0D9hLR3V8GqwtojV8Ma0TxIFkllXs00fwt049rT');
+        stripe = Stripe('pk_test_51Rj6hJ2M8hhdRIEsUpiQxhBsrO2mzGytYZORvna7LDhIr3wq8vUOPBxAnUsuDjLYTde1HULZuZ8DSqRLiIkAQzk200fPxFY7Kx');
         elements = stripe.elements();
         const style = { base: { color: getComputedStyle(document.documentElement).getPropertyValue('--text'), fontFamily: '"Georgia", serif', fontSize: '16px', '::placeholder': { color: '#aab7c4' } }, invalid: { color: '#fa755a', iconColor: '#fa755a' } };
         cardElement = elements.create('card', { style: style });
