@@ -91,7 +91,11 @@ p, .feature-list li {
 .feature-list li { margin-bottom: 0.75rem; }
 .quote { font-style: italic; color: var(--primary); margin: 2rem 0; font-size: 1.2rem; font-weight: bold; }
 .button-group { display: flex; justify-content: center; gap: 1rem; margin-top: 2rem; flex-wrap: wrap; }
-.btn { display: inline-block; padding: 1rem 2rem; font-size: 1.1rem; border-radius: 8px; text-decoration: none; font-weight: bold; cursor: pointer; border: 1px solid transparent; transition: all 0.3s; }
+.btn { display: inline-block; padding: 1rem 2rem; font-size: 1.1rem; border-radius: 8px; text-decoration: none; font-weight: bold; cursor: pointer; border: 1px solid transparent; transition: all 0.2s ease-in-out; }
+.btn:active {
+  transform: translateY(2px); /* UX Improvement: Gives buttons a 'pressed' feel */
+  filter: brightness(0.95);
+}
 .btn-primary { background: var(--button-bg); color: var(--button-text); }
 .btn-primary:hover { background: var(--button-hover-bg); transform: translateY(-2px); }
 .btn-secondary { background: var(--secondary-button-bg); color: var(--secondary-button-text); border-color: var(--border); }
@@ -220,7 +224,7 @@ body.dark .footer { color: #aaa; }
 
 /*
  ============================================
-  MOBILE RESPONSIVE STYLES
+  MOBILE RESPONSIVE STYLES (REFINED)
  ============================================
 */
 @media (max-width: 768px) {
@@ -245,43 +249,38 @@ body.dark .footer { color: #aaa; }
     font-size: 1rem;
   }
 
-  /* Responsive Pricing Table */
-  .pricing-table {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-  }
+  /* --- NEW & IMPROVED Responsive Pricing Table --- */
   .pricing-table thead {
-    display: none; /* Hide table header on mobile */
+    display: none; /* Hide the header on mobile */
   }
   .pricing-table tr {
     display: block;
-    border-bottom: 2px solid var(--primary);
-  }
-  .pricing-table tr:last-child {
-    border-bottom: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
   }
   .pricing-table td {
     display: block;
-    text-align: right; /* Align content to the right */
-    padding-left: 50%; /* Create space for the label */
-    position: relative;
-    border-bottom: 1px solid var(--border);
-  }
-  .pricing-table td:last-child {
-    border-bottom: none;
+    text-align: center; /* Center align all content */
+    padding: 0.5rem;
+    border-bottom: none; /* Remove the lines between cells */
   }
   .pricing-table td::before {
-    content: attr(data-label); /* Use data-label for the heading */
-    position: absolute;
-    left: 1rem;
-    width: calc(50% - 2rem);
-    text-align: left;
+    /* Hide the old label system */
+    content: "";
+    display: none;
+  }
+  .pricing-table .plan-name {
+    font-size: 1.3rem; /* Make the plan name a clear title */
     font-weight: bold;
     color: var(--primary);
   }
+  .pricing-table .plan-price {
+    font-size: 1.1rem;
+    margin: 0.5rem 0;
+  }
   .pricing-table .plan-action {
-    text-align: right;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    margin-top: 1rem;
   }
 }
