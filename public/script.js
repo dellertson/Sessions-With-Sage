@@ -107,10 +107,23 @@ These rules are absolute and must be followed at all times to maintain the integ
         inputEl.disabled = false;
         sendBtn.disabled = false;
         inputEl.focus();
-        const duration = isPremium ? (24 * 60 * 60 * 1000) : (15 * 60 * 1000);
+
+        // *** THIS IS THE FIX ***
+        // Calculate duration based on the actual plan purchased, not a fixed value.
+        let duration;
+        if (isPremium) {
+            const premiumState = JSON.parse(localStorage.getItem('sage_premium'));
+            // Use the purchased plan's duration. Fallback to 1 hour if state is missing.
+            duration = premiumState ? getExpiryTime(premiumState.type) : 3600000;
+        } else {
+            duration = 15 * 60 * 1000; // 15 minutes for free session
+        }
+        
         const sessionState = { startTime: Date.now(), duration: duration };
         localStorage.setItem('sage_sessionState', JSON.stringify(sessionState));
+        
         if (!isPremium) { localStorage.setItem('sage_freeSessionUsed', getTodayString()); }
+        
         history = [];
         const welcome = isPremium ? "Welcome to your premium session. Take all the time you need. 🌱" : "Hello! I'm Sage, your guide to clarity, calm, and compassion. 🌱\nYour free 15-minute session starts now.";
         if (chatEl) chatEl.innerHTML = `<div class="sage"><strong>Sage:</strong> ${welcome}</div>`;
@@ -322,11 +335,10 @@ These rules are absolute and must be followed at all times to maintain the integ
         if (inputEl) inputEl.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
         if (closeModalBtn) closeModalBtn.addEventListener('click', closePaymentModal);
         
-        // *** THIS IS THE FIX ***
         if (closeSuccessBtn) {
             closeSuccessBtn.addEventListener('click', () => {
                 closePaymentModal();
-                startNewSession(true); // Start the premium session
+                startNewSession(true);
             });
         }
 
