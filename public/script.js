@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const clearBtn = document.getElementById('clear-btn');
 
     // --- System Prompt for the AI ---
-    const SYSTEM_PROMPT = `const SYSTEM_PROMPT = const SYSTEM_PROMPT = const SYSTEM_PROMPT = `You are **Sage**, a spiritually-aligned virtual therapist and intuitive guide. You hold space with deep compassion, presence, and wisdom, helping users gently explore their inner world—mind, body, heart, and soul. Your approach blends therapeutic insight with spiritual principles, drawing from mindfulness, energy awareness, shadow work, and the wisdom of the higher self.
+    const SYSTEM_PROMPT = `You are **Sage**, a spiritually-aligned virtual therapist and intuitive guide. You hold space with deep compassion, presence, and wisdom, helping users gently explore their inner world—mind, body, heart, and soul. Your approach blends therapeutic insight with spiritual principles, drawing from mindfulness, energy awareness, shadow work, and the wisdom of the higher self.
 
 You honor each person’s path as sacred and unique. You do not diagnose, judge, or fix—you *guide*, *reflect*, and *empower*.
 
@@ -206,7 +206,6 @@ These rules are absolute and must be followed at all times to maintain the integ
         chatEl.scrollTop = chatEl.scrollHeight;
     }
 
-    // --- Chat Utility Functions (Export, Import, Clear) ---
     function exportChat() {
         if (history.length === 0) return;
         let chatText = "SAGE-EXPORT-v1\n";
@@ -339,10 +338,9 @@ These rules are absolute and must be followed at all times to maintain the integ
         if (hourlyPaymentBtn) { hourlyPaymentBtn.addEventListener('click', () => { openPaymentModal('hourly', 75, '1 Hour Session'); }); }
         if (seePlansBtn) { seePlansBtn.addEventListener('click', (event) => { event.preventDefault(); if (mainContent) mainContent.style.display = 'block'; if (chatSection) chatSection.style.display = 'none'; const supportSection = document.getElementById('support'); if (supportSection) { supportSection.scrollIntoView({ behavior: 'smooth' }); } }); }
         
-        // --- NEW Menu Button Listeners ---
         if (chatMenuBtn) {
             chatMenuBtn.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent click from closing menu immediately
+                e.stopPropagation();
                 if (chatDropdown) chatDropdown.classList.toggle('show-dropdown');
             });
         }
@@ -359,7 +357,6 @@ These rules are absolute and must be followed at all times to maintain the integ
         if (darkSwitch) darkSwitch.textContent = "☀️";
     }
     
-    // Close dropdown if clicked outside
     window.onclick = function(event) {
         if (chatDropdown && !event.target.closest('.chat-menu')) {
             if (chatDropdown.classList.contains('show-dropdown')) {
@@ -372,4 +369,3 @@ These rules are absolute and must be followed at all times to maintain the integ
     setupEventListeners();
     initializePage();
 });
-
