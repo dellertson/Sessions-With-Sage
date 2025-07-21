@@ -10,6 +10,7 @@
 <body>
   <button class="darkmode-switch" id="darkmodeSwitch" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
   
+  <!-- Stripe Payment Modal -->
   <div id="stripe-modal">
     <div class="stripe-modal-content">
       <div class="stripe-modal-header">
@@ -79,26 +80,26 @@
           </thead>
           <tbody>
             <tr>
-              <td class="plan-name">Daily Reset</td>
-              <td>Unlimited access for 24 hours</td>
-              <td class="plan-price">$1.99</td>
-              <td class="plan-action">
+              <td data-label="Plan" class="plan-name">Daily Reset</td>
+              <td data-label="What You Get">Unlimited access for 24 hours</td>
+              <td data-label="Contribution" class="plan-price">$1.99</td>
+              <td data-label="Action" class="plan-action">
                 <button class="btn btn-primary buy-btn" data-price="daily">Get Daily</button>
               </td>
             </tr>
             <tr>
-              <td class="plan-name">Weekly Care Plan</td>
-              <td>Unlimited access for 1 week</td>
-              <td class="plan-price">$7.99</td>
-              <td class="plan-action">
+              <td data-label="Plan" class="plan-name">Weekly Care Plan</td>
+              <td data-label="What You Get">Unlimited access for 1 week</td>
+              <td data-label="Contribution" class="plan-price">$7.99</td>
+              <td data-label="Action" class="plan-action">
                 <button class="btn btn-primary buy-btn" data-price="weekly">Get Weekly</button>
               </td>
             </tr>
             <tr>
-              <td class="plan-name">Monthly Wellness Pass</td>
-              <td>Unlimited access for 1 month</td>
-              <td class="plan-price">$19.99</td>
-              <td class="plan-action">
+              <td data-label="Plan" class="plan-name">Monthly Wellness Pass</td>
+              <td data-label="What You Get">Unlimited access for 1 month</td>
+              <td data-label="Contribution" class="plan-price">$19.99</td>
+              <td data-label="Action" class="plan-action">
                 <button class="btn btn-primary buy-btn" data-price="monthly">Get Monthly</button>
               </td>
             </tr>
@@ -148,4 +149,4 @@
 
   <script src="script.js"></script>
 </body>
-</html>
+</html> 
