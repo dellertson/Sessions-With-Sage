@@ -321,7 +321,15 @@ These rules are absolute and must be followed at all times to maintain the integ
         if (sendBtn) sendBtn.addEventListener('click', sendMessage);
         if (inputEl) inputEl.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
         if (closeModalBtn) closeModalBtn.addEventListener('click', closePaymentModal);
-        if (closeSuccessBtn) closeSuccessBtn.addEventListener('click', closePaymentModal);
+        
+        // *** THIS IS THE FIX ***
+        if (closeSuccessBtn) {
+            closeSuccessBtn.addEventListener('click', () => {
+                closePaymentModal();
+                startNewSession(true); // Start the premium session
+            });
+        }
+
         if (paymentForm) paymentForm.addEventListener('submit', handlePaymentSubmit);
         document.querySelectorAll('.buy-btn').forEach(button => {
             button.addEventListener('click', () => {
