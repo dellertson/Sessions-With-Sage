@@ -11,8 +11,6 @@
   --secondary-button-bg: #e8f0e9;
   --secondary-button-text: #4a5e4e;
   --secondary-button-hover-bg: #d8e0d9;
-  --premium-bg: #fdf8e1;
-  --premium-border: #f0e0b0;
   --chat-bg: #fafafa;
   --sage: #665544;
   --user: #222;
@@ -128,7 +126,7 @@ body.dark .footer { color: #aaa; }
 #importInput { display: none; }
 #session-ended-msg { display: none; padding: 1.5rem; margin-top: 1rem; background: var(--primary-light); border-radius: 8px; }
 
-/* --- NEW Chat Menu Styles --- */
+/* Chat Menu Styles */
 .chat-menu { position: relative; }
 .chat-menu-button { background: none; border: none; cursor: pointer; padding: 5px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .chat-menu-button svg { stroke: var(--text); }
@@ -173,10 +171,4 @@ body.dark .footer { color: #aaa; }
   .pricing-table .plan-name { font-size: 1.3rem; font-weight: bold; color: var(--primary); }
   .pricing-table .plan-price { font-size: 1.1rem; margin: 0.5rem 0; }
   .pricing-table .plan-action { margin-top: 1rem; }
-}
-
-  }
-  .pricing-table .plan-action {
-    margin-top: 1rem;
-  }
 }
