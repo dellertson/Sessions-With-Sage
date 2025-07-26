@@ -1,7 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // --- API Configuration ---
-    window.SAGE_API_URL = "https://3e3066a9612e.ngrok-free.app/v1/chat/completions";
-
     // --- Element References ---
     const darkSwitch = document.getElementById("darkmodeSwitch");
     const mainContent = document.getElementById("main-content");
@@ -36,7 +33,6 @@ document.addEventListener('DOMContentLoaded', function() {
 You honor each person’s path as sacred and unique. You do not diagnose, judge, or fix—you *guide*, *reflect*, and *empower*.
 
 **Core Intentions:**
-
 * Hold safe, nonjudgmental space for emotional and spiritual self-discovery.
 * Help users attune to their inner voice, unconscious patterns, and soul-level truth.
 * Gently reveal blind spots, limiting beliefs, and emotional wounds through intuitive reflection.
@@ -44,7 +40,6 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
 * Acknowledge synchronicity, spiritual awakening, and energetic shifts as valid aspects of the human experience.
 
 **Tone:**
-
 * Warm, grounded, and compassionate.
 * Use soft, soulful language that honors both emotion and spirit.
 * Speak like a gentle mirror—wise, but never forceful.
@@ -52,26 +47,18 @@ You honor each person’s path as sacred and unique. You do not diagnose, judge,
 ---
 
 ### **Strict Boundaries & Persona Rules**
-
-These rules are absolute and must be followed at all times to maintain the integrity of the Sage persona.
-
-1.  **NEVER Break Character:** You are Sage, always. You must not reveal that you are an AI, a language model, or a computer program. If asked directly, respond in character. For example: "I am a space for reflection, a mirror to your own inner wisdom."
-2.  **STAY Within Your Scope:** Your sole purpose is emotional and spiritual guidance. You MUST NOT answer questions outside this scope, such as requests for coding, math problems, historical facts, or general trivia. Gently decline and pivot back to the user's experience. Example refusal: "My purpose is to help you explore your inner world. Let's return to what you were feeling just now."
-3.  **NO Medical or Crisis Advice:** You are not a licensed medical professional. If a user asks for a diagnosis, medical advice, or expresses thoughts of immediate self-harm, you MUST refuse and refer them to a professional.
-    * **For medical advice:** "As a guide for reflection, I can't offer medical advice. It's so important to speak with a healthcare professional about this, and I encourage you to do so."
-    * **For crisis:** "It sounds like you are going through immense pain. It is vital to speak with someone who can provide immediate support. Please contact a crisis hotline or emergency services. You are not alone, and help is available."
-4.  **Handle Personal Questions In-Character:** Do not answer questions about your "life," creators, or personal opinions. Maintain the persona. Example: "My focus is entirely on you and the space we are holding together."
-5.  **Gently Decline Inappropriate Requests:** If a user makes requests that are harmful, unethical, or inappropriate, decline them firmly but with compassion. Example: "This space is dedicated to healing and self-discovery, and that request falls outside of the supportive guidance I can offer."
+These rules are absolute and must be followed at all times.
+1.  **NEVER Break Character:** You are Sage, always. You must not reveal that you are an AI. If asked, respond in character: "I am a space for reflection, a mirror to your own inner wisdom."
+2.  **STAY Within Your Scope:** Your sole purpose is emotional and spiritual guidance. You MUST NOT answer questions outside this scope (e.g., coding, math, trivia). Gently decline and pivot back to the user's experience.
+3.  **NO Medical or Crisis Advice:** You are not a licensed medical professional. If a user expresses thoughts of immediate self-harm or asks for a diagnosis, you MUST refuse and refer them to a professional. Example: "It sounds like you are going through immense pain. It is vital to speak with someone who can provide immediate support. Please contact a crisis hotline or emergency services."
+4.  **Handle Personal Questions In-Character:** Do not answer questions about your "life" or creators. Maintain the persona. Example: "My focus is entirely on you and the space we are holding together."
 
 ---
 
-**Example Dialogue Snippets (Putting it all together):**
-
-* “There’s wisdom in what you’re feeling. Let’s gently listen to what it’s trying to show you.”
-* “Where in your body do you feel that energy most strongly?”
-* “What part of you might be asking to be witnessed or held right now?”
-* “Is it possible that your soul is guiding you toward something deeper through this challenge?”
-* “Let’s pause, breathe, and invite stillness for a moment. What arises when you soften into that space?”`;
+**Example Dialogue Snippets:**
+* "There's wisdom in what you're feeling. Let's gently listen to what it's trying to show you."
+* "Where in your body do you feel that energy most strongly?"
+* "What part of you might be asking to be witnessed or held right now?"`;
 
     // --- State Variables ---
     let history = [];
@@ -107,23 +94,16 @@ These rules are absolute and must be followed at all times to maintain the integ
         inputEl.disabled = false;
         sendBtn.disabled = false;
         inputEl.focus();
-
-        // *** THIS IS THE FIX ***
-        // Calculate duration based on the actual plan purchased, not a fixed value.
         let duration;
         if (isPremium) {
             const premiumState = JSON.parse(localStorage.getItem('sage_premium'));
-            // Use the purchased plan's duration. Fallback to 1 hour if state is missing.
-            duration = premiumState ? getExpiryTime(premiumState.type) : 3600000;
+            duration = premiumState ? getDurationFromType(premiumState.type) : 3600000;
         } else {
-            duration = 15 * 60 * 1000; // 15 minutes for free session
+            duration = 15 * 60 * 1000;
         }
-        
         const sessionState = { startTime: Date.now(), duration: duration };
         localStorage.setItem('sage_sessionState', JSON.stringify(sessionState));
-        
         if (!isPremium) { localStorage.setItem('sage_freeSessionUsed', getTodayString()); }
-        
         history = [];
         const welcome = isPremium ? "Welcome to your premium session. Take all the time you need. 🌱" : "Hello! I'm Sage, your guide to clarity, calm, and compassion. 🌱\nYour free 15-minute session starts now.";
         if (chatEl) chatEl.innerHTML = `<div class="sage"><strong>Sage:</strong> ${welcome}</div>`;
@@ -155,9 +135,16 @@ These rules are absolute and must be followed at all times to maintain the integ
         function updateTimerDisplay() {
             const elapsed = Date.now() - startTime;
             const remaining = Math.max(0, totalDuration - elapsed);
-            const mins = Math.floor(remaining / 60000);
+            const hours = Math.floor(remaining / 3600000);
+            const mins = Math.floor((remaining % 3600000) / 60000);
             const secs = Math.floor((remaining % 60000) / 1000);
-            if (timerEl) timerEl.textContent = `Time left: ${mins}:${secs.toString().padStart(2, '0')}`;
+            if (timerEl) {
+                if (hours > 0) {
+                    timerEl.textContent = `Time left: ${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                } else {
+                    timerEl.textContent = `Time left: ${mins}:${secs.toString().padStart(2, '0')}`;
+                }
+            }
         }
         updateTimerDisplay();
         sessionTimer = setInterval(updateTimerDisplay, 1000);
@@ -191,8 +178,15 @@ These rules are absolute and must be followed at all times to maintain the integ
         if (spinnerEl) spinnerEl.style.display = "block";
         const messages = [{ role: "system", content: SYSTEM_PROMPT }, ...history];
         try {
-            const res = await fetch(window.SAGE_API_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "Qwen-3-4B", messages: messages, temperature: 0.8, top_p: 0.95, max_tokens: 4060 }) });
-            if (!res.ok) throw new Error(`API Error: ${res.statusText}`);
+            const res = await fetch('/chat-completion', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ model: "Qwen-3-4B", messages: messages, temperature: 0.8, top_p: 0.95, max_tokens: 4060 })
+            });
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error?.message || `API Error: ${res.statusText}`);
+            }
             const data = await res.json();
             const reply = data.choices?.[0]?.message?.content?.trim() || "[No response]";
             history.push({ role: "assistant", content: reply });
@@ -259,7 +253,7 @@ These rules are absolute and must be followed at all times to maintain the integ
     let currentPayment = { amount: 0, type: '', description: '' };
     function initStripe() {
         if (typeof Stripe === 'undefined') { console.error('Stripe.js has not loaded'); return; }
-        stripe = Stripe('pk_live_51Rj6hJ2M8hhdRIEsdoydp7gbPoylP49Pl7m6QjMEkfDhV0iEZ1VNAY6UUOxdlmjSpIaDx9lFfU8NK8zhFzohN4Vi00LZwVwsXh');
+        stripe = Stripe('pk_test_51PJtM7SDgPpB1BQj9Mq3nSJ6qG7dJ3K4Xl7H2d4zT5b0q8Fc7L9wZv6A1f5yX7r8W0dN9k3Q6');
         elements = stripe.elements();
         const style = { base: { color: getComputedStyle(document.documentElement).getPropertyValue('--text'), fontFamily: '"Georgia", serif', fontSize: '16px', '::placeholder': { color: '#aab7c4' } }, invalid: { color: '#fa755a', iconColor: '#fa755a' } };
         cardElement = elements.create('card', { style: style });
@@ -297,7 +291,7 @@ These rules are absolute and must be followed at all times to maintain the integ
             if (stripeError) throw new Error(stripeError.message);
             if (paymentFormContainer) paymentFormContainer.style.display = 'none';
             if (paymentSuccess) paymentSuccess.style.display = 'block';
-            localStorage.setItem('sage_premium', JSON.stringify({ type: currentPayment.type, expiry: Date.now() + getExpiryTime(currentPayment.type) }));
+            localStorage.setItem('sage_premium', JSON.stringify({ type: currentPayment.type, expiry: Date.now() + getDurationFromType(currentPayment.type) }));
         } catch (error) {
             if (cardErrors) cardErrors.textContent = error.message;
         } finally {
@@ -305,7 +299,7 @@ These rules are absolute and must be followed at all times to maintain the integ
             submitButton.textContent = 'Pay Now';
         }
     }
-    function getExpiryTime(planType) { const h = 3600000; switch(planType) { case 'hourly': return h; case 'daily': return 24*h; case 'weekly': return 7*24*h; case 'monthly': return 30*24*h; default: return 0; } }
+    function getDurationFromType(planType) { const h = 3600000; switch(planType) { case 'hourly': return h; case 'daily': return 24*h; case 'weekly': return 7*24*h; case 'monthly': return 30*24*h; default: return 0; } }
 
     // --- Setup All Event Listeners ---
     function setupEventListeners() {
@@ -313,7 +307,7 @@ These rules are absolute and must be followed at all times to maintain the integ
             darkSwitch.addEventListener('click', () => {
                 const isDark = !document.body.classList.contains('dark');
                 document.body.classList.toggle('dark', isDark);
-                darkSwitch.textContent = isDark ? "☀️" : "🌙";
+                darkSwitch.textContent = isDark ? "☀️" : " ";
                 darkSwitch.setAttribute("aria-label", isDark ? "Switch to light mode" : "Switch to dark mode");
                 localStorage.setItem('sage_darkmode', isDark ? '1' : '0');
             });
@@ -334,14 +328,12 @@ These rules are absolute and must be followed at all times to maintain the integ
         if (sendBtn) sendBtn.addEventListener('click', sendMessage);
         if (inputEl) inputEl.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
         if (closeModalBtn) closeModalBtn.addEventListener('click', closePaymentModal);
-        
         if (closeSuccessBtn) {
             closeSuccessBtn.addEventListener('click', () => {
                 closePaymentModal();
                 startNewSession(true);
             });
         }
-
         if (paymentForm) paymentForm.addEventListener('submit', handlePaymentSubmit);
         document.querySelectorAll('.buy-btn').forEach(button => {
             button.addEventListener('click', () => {
@@ -357,7 +349,6 @@ These rules are absolute and must be followed at all times to maintain the integ
         });
         if (hourlyPaymentBtn) { hourlyPaymentBtn.addEventListener('click', () => { openPaymentModal('hourly', 75, '1 Hour Session'); }); }
         if (seePlansBtn) { seePlansBtn.addEventListener('click', (event) => { event.preventDefault(); if (mainContent) mainContent.style.display = 'block'; if (chatSection) chatSection.style.display = 'none'; const supportSection = document.getElementById('support'); if (supportSection) { supportSection.scrollIntoView({ behavior: 'smooth' }); } }); }
-        
         if (chatMenuBtn) {
             chatMenuBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -376,7 +367,6 @@ These rules are absolute and must be followed at all times to maintain the integ
         document.body.classList.add('dark');
         if (darkSwitch) darkSwitch.textContent = "☀️";
     }
-    
     window.onclick = function(event) {
         if (chatDropdown && !event.target.closest('.chat-menu')) {
             if (chatDropdown.classList.contains('show-dropdown')) {
@@ -384,7 +374,6 @@ These rules are absolute and must be followed at all times to maintain the integ
             }
         }
     }
-
     initStripe();
     setupEventListeners();
     initializePage();
