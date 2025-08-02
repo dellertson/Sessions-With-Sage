@@ -276,7 +276,7 @@ These rules are absolute and must be followed at all times.
     let currentPayment = { amount: 0, type: '', description: '' };
     function initStripe() {
         if (typeof Stripe === 'undefined') { console.error('Stripe.js has not loaded'); return; }
-        stripe = Stripe('pk_test_51PJtM7SDgPpB1BQj9Mq3nSJ6qG7dJ3K4Xl7H2d4zT5b0q8Fc7L9wZv6A1f5yX7r8W0dN9k3Q6');
+        stripe = Stripe('pk_live_51Rj6hJ2M8hhdRIEsdoydp7gbPoylP49Pl7m6QjMEkfDhV0iEZ1VNAY6UUOxdlmjSpIaDx9lFfU8NK8zhFzohN4Vi00LZwVwsXh');
         elements = stripe.elements();
         const style = { base: { color: getComputedStyle(document.documentElement).getPropertyValue('--text'), fontFamily: '"Georgia", serif', fontSize: '16px', '::placeholder': { color: '#aab7c4' } }, invalid: { color: '#fa755a', iconColor: '#fa755a' } };
         cardElement = elements.create('card', { style: style });
@@ -401,3 +401,4 @@ These rules are absolute and must be followed at all times.
     setupEventListeners();
     initializePage();
 });
+
