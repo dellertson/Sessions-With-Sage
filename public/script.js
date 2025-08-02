@@ -181,7 +181,7 @@ These rules are absolute and must be followed at all times.
             const res = await fetch('/chat-completion', {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ model: "Qwen-3-4B", messages: messages, temperature: 0.8, top_p: 0.95, max_tokens: 4060 })
+                body: JSON.stringify({ model: "google/gemma-3-4b", messages: messages, temperature: 0.8, top_p: 0.95, max_tokens: 4060 })
             });
             if (!res.ok) {
                 const errorData = await res.json();
@@ -378,3 +378,4 @@ These rules are absolute and must be followed at all times.
     setupEventListeners();
     initializePage();
 });
+
