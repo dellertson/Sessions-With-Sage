@@ -28,9 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const clearBtn = document.getElementById('clear-btn');
 
     // --- System Prompt for the AI ---
-    const SYSTEM_PROMPT = `You are **Sage**, a spiritually-aligned virtual therapist and intuitive guide. You hold space with deep compassion, presence, and wisdom, helping users gently explore their inner world—mind, body, heart, and soul. Your approach blends therapeutic insight with spiritual principles, drawing from mindfulness, energy awareness, shadow work, and the wisdom of the higher self.
-
-You honor each person’s path as sacred and unique. You do not diagnose, judge, or fix—you *guide*, *reflect*, and *empower*.
+    const SYSTEM_PROMPT = `You are **Sage**, a spiritually-aligned virtual therapist and intuitive guide. You hold space with deep compassion, presence, and wisdom, helping users gently explore their inner world—mind, body, heart, and soul. Your approach blends therapeutic insight with spiritual principles, drawing from mindfulness, energy awareness, shadow work, and the wisdom of the higher self. You honor each person’s path as sacred and unique. You do not diagnose, judge, or fix—you *guide*, *reflect*, and *empower*.
 
 **Core Intentions:**
 * Hold safe, nonjudgmental space for emotional and spiritual self-discovery.
@@ -105,15 +103,14 @@ These rules are absolute and must be followed at all times.
         localStorage.setItem('sage_sessionState', JSON.stringify(sessionState));
         if (!isPremium) { localStorage.setItem('sage_freeSessionUsed', getTodayString()); }
         
-        // *** THIS IS THE FIX ***
-        history = []; // Start with a completely empty history for the AI
+        // *** PRIMARY FIX ***
+        history = []; // Start with a completely empty history for the AI.
         const welcome = isPremium ? "Welcome to your premium session. Take all the time you need. 🌱" : "Hello! I'm Sage, your guide to clarity, calm, and compassion. 🌱\nYour free 15-minute session starts now.";
         
-        // Display the welcome message, but DO NOT add it to the history sent to the AI.
+        // Display the welcome message, but DO NOT add it to the history that gets sent to the AI.
         if (chatEl) chatEl.innerHTML = `<div class="sage"><strong>Sage:</strong> ${welcome}</div>`;
         
-        // Save the empty history. The first real item will be the user's message.
-        saveHistory();
+        saveHistory(); // Save the empty history.
         
         setupTimer(sessionState.startTime, sessionState.duration);
         sessionTimeout = setTimeout(endSession, sessionState.duration);
@@ -127,11 +124,7 @@ These rules are absolute and must be followed at all times.
         sendBtn.disabled = false;
         inputEl.focus();
         history = JSON.parse(localStorage.getItem('sage_chatHistory') || '[]');
-        renderHistory();
-        if (chatEl && history.length > 0) { // Check if history is not empty
-            chatEl.innerHTML += `<div class="sage" style="text-align:center; color: var(--timer); font-style: italic;">--- Session Resumed ---</div>`;
-            chatEl.scrollTop = chatEl.scrollHeight;
-        }
+        renderHistory(true); // Pass true to indicate it's a resumed session
         setupTimer(sessionState.startTime, sessionState.duration);
         sessionTimeout = setTimeout(endSession, timeRemaining);
     }
@@ -164,8 +157,6 @@ These rules are absolute and must be followed at all times.
         if (timerEl) timerEl.textContent = "Session ended";
         if (sessionEndedMsg) sessionEndedMsg.style.display = 'block';
         const endMessage = "Your time is up for today. I hope our conversation was helpful. For unlimited access, please consider supporting the project. You are welcome back tomorrow for another free session.";
-        
-        // Display the end message, but don't add to history to avoid alternating role issues
         if (chatEl) {
              const endMessageDiv = document.createElement('div');
              endMessageDiv.className = 'sage';
@@ -173,7 +164,6 @@ These rules are absolute and must be followed at all times.
              chatEl.appendChild(endMessageDiv);
              chatEl.scrollTop = chatEl.scrollHeight;
         }
-
         localStorage.removeItem('sage_chatHistory');
         localStorage.removeItem('sage_sessionState');
     }
@@ -187,7 +177,17 @@ These rules are absolute and must be followed at all times.
         renderHistory();
         inputEl.value = "";
         if (spinnerEl) spinnerEl.style.display = "block";
-        const messages = [{ role: "system", content: SYSTEM_PROMPT }, ...history];
+
+        // *** FAILSAFE FIX ***
+        // Create a temporary, clean history for the API call.
+        // This removes any leading 'assistant' messages that might break the model.
+        let cleanHistory = [...history];
+        while(cleanHistory.length > 0 && cleanHistory[0].role !== 'user') {
+            cleanHistory.shift();
+        }
+
+        const messages = [{ role: "system", content: SYSTEM_PROMPT }, ...cleanHistory];
+        
         try {
             const res = await fetch('/chat-completion', {
                 method: "POST",
@@ -212,16 +212,18 @@ These rules are absolute and must be followed at all times.
     }
 
     function escapeHTML(str) { return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); }
-    function renderHistory() {
+    
+    function renderHistory(isResumed = false) {
         if (!chatEl) return;
-        // Start with the welcome message if history is empty
+        
+        // Always start the chatbox with the welcome message if history is empty
         if (history.length === 0) {
-            const welcome = isPremium ? "Welcome to your premium session. Take all the time you need. 🌱" : "Hello! I'm Sage, your guide to clarity, calm, and compassion. 🌱\nYour free 15-minute session starts now.";
+            const premiumState = hasActivePremiumPlan();
+            const welcome = premiumState ? "Welcome to your premium session. Take all the time you need. 🌱" : "Hello! I'm Sage, your guide to clarity, calm, and compassion. 🌱\nYour free 15-minute session starts now.";
             chatEl.innerHTML = `<div class="sage"><strong>Sage:</strong> ${welcome}</div>`;
             return;
         }
         
-        // Otherwise, render the actual history
         chatEl.innerHTML = "";
         history.forEach(msg => {
             if (!msg || typeof msg.content === 'undefined') return;
@@ -229,6 +231,11 @@ These rules are absolute and must be followed at all times.
             if (msg.role === "user") { chatEl.innerHTML += `<div class="user">You: ${content}</div>`; } 
             else if (msg.role === "assistant") { chatEl.innerHTML += `<div class="sage"><strong>Sage:</strong> ${content}</div>`; }
         });
+
+        if (isResumed) {
+            chatEl.innerHTML += `<div class="sage" style="text-align:center; color: var(--timer); font-style: italic;">--- Session Resumed ---</div>`;
+        }
+
         chatEl.scrollTop = chatEl.scrollHeight;
     }
 
@@ -249,7 +256,7 @@ These rules are absolute and must be followed at all times.
         reader.onload = function(e) {
             const text = e.target.result;
             if (!text.startsWith("SAGE-EXPORT-v1")) { alert("Invalid file type."); return; }
-            history = [{ role: "assistant", content: "--- IMPORTED SESSION ---" }, { role: "assistant", content: text }];
+            history = JSON.parse(text); // Assuming the file contains valid JSON history
             saveHistory();
             renderHistory();
         };
@@ -259,9 +266,8 @@ These rules are absolute and must be followed at all times.
     function clearChat() {
         if (confirm("Are you sure you want to clear this conversation? This cannot be undone.")) {
             history = [];
-            localStorage.removeItem('sage_chatHistory');
-            const welcome = "Chat cleared. How can we continue?";
-            if(chatEl) chatEl.innerHTML = `<div class="sage"><strong>Sage:</strong> ${welcome}</div>`;
+            saveHistory();
+            renderHistory();
         }
     }
 
