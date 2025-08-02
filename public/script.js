@@ -104,11 +104,17 @@ These rules are absolute and must be followed at all times.
         const sessionState = { startTime: Date.now(), duration: duration };
         localStorage.setItem('sage_sessionState', JSON.stringify(sessionState));
         if (!isPremium) { localStorage.setItem('sage_freeSessionUsed', getTodayString()); }
-        history = [];
+        
+        // *** THIS IS THE FIX ***
+        history = []; // Start with a completely empty history for the AI
         const welcome = isPremium ? "Welcome to your premium session. Take all the time you need. 🌱" : "Hello! I'm Sage, your guide to clarity, calm, and compassion. 🌱\nYour free 15-minute session starts now.";
+        
+        // Display the welcome message, but DO NOT add it to the history sent to the AI.
         if (chatEl) chatEl.innerHTML = `<div class="sage"><strong>Sage:</strong> ${welcome}</div>`;
-        history.push({ role: "assistant", content: welcome });
+        
+        // Save the empty history. The first real item will be the user's message.
         saveHistory();
+        
         setupTimer(sessionState.startTime, sessionState.duration);
         sessionTimeout = setTimeout(endSession, sessionState.duration);
     }
@@ -122,7 +128,7 @@ These rules are absolute and must be followed at all times.
         inputEl.focus();
         history = JSON.parse(localStorage.getItem('sage_chatHistory') || '[]');
         renderHistory();
-        if (chatEl && history.length > 1) {
+        if (chatEl && history.length > 0) { // Check if history is not empty
             chatEl.innerHTML += `<div class="sage" style="text-align:center; color: var(--timer); font-style: italic;">--- Session Resumed ---</div>`;
             chatEl.scrollTop = chatEl.scrollHeight;
         }
@@ -158,11 +164,16 @@ These rules are absolute and must be followed at all times.
         if (timerEl) timerEl.textContent = "Session ended";
         if (sessionEndedMsg) sessionEndedMsg.style.display = 'block';
         const endMessage = "Your time is up for today. I hope our conversation was helpful. For unlimited access, please consider supporting the project. You are welcome back tomorrow for another free session.";
-        if (history.length === 0 || history[history.length - 1].content !== endMessage) {
-            history.push({ role: 'assistant', content: endMessage });
-            saveHistory();
-            renderHistory();
+        
+        // Display the end message, but don't add to history to avoid alternating role issues
+        if (chatEl) {
+             const endMessageDiv = document.createElement('div');
+             endMessageDiv.className = 'sage';
+             endMessageDiv.innerHTML = `<strong>Sage:</strong> ${endMessage}`;
+             chatEl.appendChild(endMessageDiv);
+             chatEl.scrollTop = chatEl.scrollHeight;
         }
+
         localStorage.removeItem('sage_chatHistory');
         localStorage.removeItem('sage_sessionState');
     }
@@ -203,6 +214,14 @@ These rules are absolute and must be followed at all times.
     function escapeHTML(str) { return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); }
     function renderHistory() {
         if (!chatEl) return;
+        // Start with the welcome message if history is empty
+        if (history.length === 0) {
+            const welcome = isPremium ? "Welcome to your premium session. Take all the time you need. 🌱" : "Hello! I'm Sage, your guide to clarity, calm, and compassion. 🌱\nYour free 15-minute session starts now.";
+            chatEl.innerHTML = `<div class="sage"><strong>Sage:</strong> ${welcome}</div>`;
+            return;
+        }
+        
+        // Otherwise, render the actual history
         chatEl.innerHTML = "";
         history.forEach(msg => {
             if (!msg || typeof msg.content === 'undefined') return;
@@ -242,9 +261,7 @@ These rules are absolute and must be followed at all times.
             history = [];
             localStorage.removeItem('sage_chatHistory');
             const welcome = "Chat cleared. How can we continue?";
-            history.push({ role: "assistant", content: welcome });
-            saveHistory();
-            renderHistory();
+            if(chatEl) chatEl.innerHTML = `<div class="sage"><strong>Sage:</strong> ${welcome}</div>`;
         }
     }
 
@@ -253,7 +270,7 @@ These rules are absolute and must be followed at all times.
     let currentPayment = { amount: 0, type: '', description: '' };
     function initStripe() {
         if (typeof Stripe === 'undefined') { console.error('Stripe.js has not loaded'); return; }
-        stripe = Stripe('pk_live_51Rj6hJ2M8hhdRIEsdoydp7gbPoylP49Pl7m6QjMEkfDhV0iEZ1VNAY6UUOxdlmjSpIaDx9lFfU8NK8zhFzohN4Vi00LZwVwsXh');
+        stripe = Stripe('pk_test_51PJtM7SDgPpB1BQj9Mq3nSJ6qG7dJ3K4Xl7H2d4zT5b0q8Fc7L9wZv6A1f5yX7r8W0dN9k3Q6');
         elements = stripe.elements();
         const style = { base: { color: getComputedStyle(document.documentElement).getPropertyValue('--text'), fontFamily: '"Georgia", serif', fontSize: '16px', '::placeholder': { color: '#aab7c4' } }, invalid: { color: '#fa755a', iconColor: '#fa755a' } };
         cardElement = elements.create('card', { style: style });
@@ -307,7 +324,7 @@ These rules are absolute and must be followed at all times.
             darkSwitch.addEventListener('click', () => {
                 const isDark = !document.body.classList.contains('dark');
                 document.body.classList.toggle('dark', isDark);
-                darkSwitch.textContent = isDark ? "☀️" : " ";
+                darkSwitch.textContent = isDark ? "☀️" : "🌙";
                 darkSwitch.setAttribute("aria-label", isDark ? "Switch to light mode" : "Switch to dark mode");
                 localStorage.setItem('sage_darkmode', isDark ? '1' : '0');
             });
@@ -378,4 +395,3 @@ These rules are absolute and must be followed at all times.
     setupEventListeners();
     initializePage();
 });
-
